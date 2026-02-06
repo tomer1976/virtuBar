@@ -6,7 +6,8 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 ## Frontend Tasks
 - [x] Scaffold web app structure under `apps/web` with routing for `/`, `/login`, `/onboarding`, `/rooms`, `/bar/:roomId`.
 	- Completed with Vite React scaffold, route pages, and router tests covering all paths.
-- [ ] Implement feature flag plumbing (env + provider) exposing `USE_MOCK_AUTH`, `USE_MOCK_PROFILE`, `USE_MOCK_ROOMS`, `USE_MOCK_REALTIME`, `USE_MOCK_VOICE` (default true).
+- [x] Implement feature flag plumbing (env + provider) exposing `USE_MOCK_AUTH`, `USE_MOCK_PROFILE`, `USE_MOCK_ROOMS`, `USE_MOCK_REALTIME`, `USE_MOCK_VOICE` (default true).
+	- Added FeatureFlagsProvider with Vite env parsing, defaults true, and tests covering parsing and context delivery.
 - [ ] Build design tokens (colors, spacing, typography) and apply to global styles/theme provider.
 - [ ] Implement UI kit components: Button, Input, Modal, Drawer, Toast, AvatarBadge, TagChip; add a showcase/demo route/page.
 - [ ] Create mock auth provider returning deterministic fake user and storing identity in local storage.
