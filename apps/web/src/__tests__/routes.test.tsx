@@ -1,11 +1,17 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { AuthProvider } from '../app/providers/AuthProvider';
+import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
 import { AppRoutes, routePaths } from '../routes';
 
 function renderWithRouter(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <AppRoutes />
+      <FeatureFlagsProvider>
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
+      </FeatureFlagsProvider>
     </MemoryRouter>,
   );
 }

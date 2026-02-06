@@ -12,7 +12,8 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Added CSS token variables, TypeScript token map, and applied tokens across global shell styles with tests.
 - [x] Implement UI kit components: Button, Input, Modal, Drawer, Toast, AvatarBadge, TagChip; add a showcase/demo route/page.
 	- Added styled components with design tokens, UI Kit page at `/ui-kit`, navigation link, and tests covering interactions.
-- [ ] Create mock auth provider returning deterministic fake user and storing identity in local storage.
+- [x] Create mock auth provider returning deterministic fake user and storing identity in local storage.
+	- Added AuthProvider with deterministic mock user, localStorage persistence, login/logout API, and wired login page display; tests cover persistence and hydration.
 - [ ] Create mock profile provider persisting profile data in local storage; wire onboarding wizard to it.
 - [ ] Implement onboarding wizard screens (display name, avatar preset, interest tags, audio setup UI simulation) using mock providers.
 - [ ] Implement rooms screen using mock rooms dataset; include “Join hottest room” CTA that routes to a selected room ID.
