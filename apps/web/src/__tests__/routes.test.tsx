@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../app/providers/AuthProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
+import { ProfileProvider } from '../app/providers/ProfileProvider';
 import { AppRoutes, routePaths } from '../routes';
 
 function renderWithRouter(path: string) {
@@ -9,7 +10,9 @@ function renderWithRouter(path: string) {
     <MemoryRouter initialEntries={[path]}>
       <FeatureFlagsProvider>
         <AuthProvider>
-          <AppRoutes />
+          <ProfileProvider>
+            <AppRoutes />
+          </ProfileProvider>
         </AuthProvider>
       </FeatureFlagsProvider>
     </MemoryRouter>,
