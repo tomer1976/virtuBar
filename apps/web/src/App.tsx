@@ -23,6 +23,9 @@ function App() {
               <Link to={routePaths.rooms}>Rooms</Link>
             </li>
             <li className="nav-item">
+              <Link to={routePaths.uiKit}>UI Kit</Link>
+            </li>
+            <li className="nav-item">
               <Link to={routePaths.bar.replace(':roomId', 'demo-room')}>Enter Bar</Link>
             </li>
           </ul>

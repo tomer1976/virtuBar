@@ -10,7 +10,8 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Added FeatureFlagsProvider with Vite env parsing, defaults true, and tests covering parsing and context delivery.
 - [x] Build design tokens (colors, spacing, typography) and apply to global styles/theme provider.
 	- Added CSS token variables, TypeScript token map, and applied tokens across global shell styles with tests.
-- [ ] Implement UI kit components: Button, Input, Modal, Drawer, Toast, AvatarBadge, TagChip; add a showcase/demo route/page.
+- [x] Implement UI kit components: Button, Input, Modal, Drawer, Toast, AvatarBadge, TagChip; add a showcase/demo route/page.
+	- Added styled components with design tokens, UI Kit page at `/ui-kit`, navigation link, and tests covering interactions.
 - [ ] Create mock auth provider returning deterministic fake user and storing identity in local storage.
 - [ ] Create mock profile provider persisting profile data in local storage; wire onboarding wizard to it.
 - [ ] Implement onboarding wizard screens (display name, avatar preset, interest tags, audio setup UI simulation) using mock providers.
