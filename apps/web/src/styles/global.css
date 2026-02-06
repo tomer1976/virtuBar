@@ -1,8 +1,10 @@
+@import './design-tokens.css';
+
 :root {
-  color: #0f172a;
-  background-color: #f8fafc;
-  font-family: 'Segoe UI', Arial, sans-serif;
-  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
 }
 
 * {
@@ -26,13 +28,13 @@ a {
 
 .app-nav {
   width: 240px;
-  padding: 24px;
-  background: #e2e8f0;
+  padding: var(--space-6);
+  background: var(--color-nav);
 }
 
 .app-content {
   flex: 1;
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 .nav-list {
@@ -42,38 +44,38 @@ a {
 }
 
 .nav-item {
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .page-card {
-  background: #fff;
-  border: 1px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
 }
 
 .page-title {
-  margin: 0 0 8px;
-  font-size: 1.5rem;
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-title);
 }
 
 .page-subtitle {
-  margin: 0 0 16px;
-  color: #475569;
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-muted);
 }
 
 .route-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
 }
 
 .route-chip {
-  padding: 10px 12px;
-  border: 1px dashed #94a3b8;
-  border-radius: 10px;
-  background: #f8fafc;
+  padding: calc(var(--space-2) + 2px) var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
   font-size: 0.95rem;
 }
