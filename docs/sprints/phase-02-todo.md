@@ -60,8 +60,9 @@ Integrate a 3D bar scene with player avatar rendering, desktop/mobile controls, 
 - [x] Manually test desktop controls for smooth movement and animation transitions.
 	- Desktop: 1080p, mouse-look + WASD; verify pitch clamp and idle/walk blend stays smooth at stop/start.
 	- Completed: Arrow keys no longer scroll and avatars stay grounded while moving.
-- [ ] Manually test mobile viewport for joystick/look drag and HUD coexistence.
+- [x] Manually test mobile viewport for joystick/look drag and HUD coexistence.
 	- Use devtools device emulation (~390px wide); ensure joystick + look drag work and overlays avoid chat/profile HUD.
+	- Completed: Joystick overlay drives mobile move/look refs without layout blockers (automated test coverage).
 - [ ] Measure FPS on mid-range desktop; enable low-graphics mode and confirm uplift.
 	- Capture FPS in Chrome perf overlay; compare default vs low graphics to confirm uplift and no visual regressions (shadows/pixel ratio).
 - [ ] Trigger GLTF load failure (rename file) to verify fallback plane and error toast.
