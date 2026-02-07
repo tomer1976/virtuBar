@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 type RendererFactoryOptions = {
   antialias: boolean;
@@ -19,10 +20,24 @@ type SceneRootProps = {
   enableShadows?: boolean;
   rendererFactory?: (options: RendererFactoryOptions) => RendererLike;
   skipSupportCheck?: boolean;
+  gltfUrl?: string;
+  loaderFactory?: () => GltfLoader;
+  loadScene?: boolean;
 };
 
 const defaultRendererFactory = (options: RendererFactoryOptions): RendererLike =>
   new THREE.WebGLRenderer(options);
+
+type GltfLoader = {
+  load: (
+    url: string,
+    onLoad: (gltf: { scene: THREE.Group }) => void,
+    onProgress?: (event: ProgressEvent<EventTarget>) => void,
+    onError?: (error: unknown) => void,
+  ) => void;
+};
+
+const defaultLoaderFactory = (): GltfLoader => new GLTFLoader();
 
 function supportsWebGL(): boolean {
   try {
@@ -47,10 +62,14 @@ function measureSize(element: HTMLElement) {
 function SceneRoot({
   enableShadows = true,
   rendererFactory = defaultRendererFactory,
+  loaderFactory = defaultLoaderFactory,
   skipSupportCheck = false,
+  gltfUrl = '/models/bar.glb',
+  loadScene = true,
 }: SceneRootProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
+  const [modelError, setModelError] = useState<string | null>(null);
   const lights = useMemo(() => ({
     ambient: new THREE.AmbientLight(0xffffff, 0.35),
     hemi: new THREE.HemisphereLight(0x7dd3fc, 0x0f172a, 0.45),
@@ -64,6 +83,7 @@ function SceneRoot({
     }
 
     setInitError(null);
+    setModelError(null);
 
     if (!skipSupportCheck && !supportsWebGL()) {
       setInitError('3D preview unavailable in this environment.');
@@ -117,6 +137,33 @@ function SceneRoot({
     platform.receiveShadow = enableShadows;
     scene.add(platform);
 
+    let loadedScene: THREE.Object3D | null = null;
+    if (loadScene && gltfUrl) {
+      try {
+        const loader = loaderFactory();
+        loader.load(
+          gltfUrl,
+          (gltf) => {
+            loadedScene = gltf.scene;
+            gltf.scene.traverse((node) => {
+              const object = node as THREE.Object3D;
+              object.castShadow = enableShadows;
+              object.receiveShadow = enableShadows;
+            });
+            scene.add(gltf.scene);
+          },
+          undefined,
+          (error) => {
+            console.warn('SceneRoot: GLTF load failed', error);
+            setModelError('Scene model unavailable; showing fallback pad.');
+          },
+        );
+      } catch (error) {
+        console.warn('SceneRoot: GLTF loader failed to start', error);
+        setModelError('Scene model unavailable; showing fallback pad.');
+      }
+    }
+
     renderer.domElement.style.width = '100%';
     renderer.domElement.style.height = '100%';
     renderer.domElement.setAttribute('aria-label', '3D scene viewport');
@@ -143,6 +190,9 @@ function SceneRoot({
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener('resize', handleResize);
+      if (loadedScene) {
+        scene.remove(loadedScene);
+      }
       scene.remove(platform);
       scene.remove(floor);
       if (renderer && mountEl.contains(renderer.domElement)) {
@@ -155,13 +205,18 @@ function SceneRoot({
       floorMaterial.dispose();
       renderer = null;
     };
-  }, [enableShadows, lights, rendererFactory, skipSupportCheck]);
+  }, [enableShadows, gltfUrl, lights, loadScene, loaderFactory, rendererFactory, skipSupportCheck]);
 
   return (
     <div className="scene-root" ref={mountRef} data-testid="scene-root">
       {initError ? (
         <div className="scene-fallback" role="status">
           {initError}
+        </div>
+      ) : null}
+      {modelError ? (
+        <div className="scene-overlay" role="status">
+          {modelError}
         </div>
       ) : null}
     </div>

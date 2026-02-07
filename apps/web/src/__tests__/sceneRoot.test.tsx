@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import * as THREE from 'three';
 import SceneRoot from '../three/SceneRoot';
 
 type RendererStub = {
@@ -25,21 +26,31 @@ function createRendererStub(): RendererStub {
 describe('SceneRoot', () => {
   it('mounts renderer canvas and disposes on unmount', () => {
     const renderer = createRendererStub();
+    const loader = { load: vi.fn((url, onLoad) => onLoad?.({ scene: new THREE.Group() })) };
     const { unmount } = render(
-      <SceneRoot rendererFactory={() => renderer} skipSupportCheck />,
+      <SceneRoot rendererFactory={() => renderer} loaderFactory={() => loader} skipSupportCheck />,
     );
 
     expect(renderer.setPixelRatio).toHaveBeenCalled();
     expect(renderer.setSize).toHaveBeenCalledWith(640, 360, false);
     expect(renderer.domElement.parentElement).not.toBeNull();
+    expect(loader.load).toHaveBeenCalled();
 
     unmount();
 
     expect(renderer.dispose).toHaveBeenCalled();
   });
 
-  it('shows fallback text when WebGL is unavailable', () => {
-    render(<SceneRoot />);
-    expect(screen.getByText(/3d preview unavailable/i)).toBeInTheDocument();
+  it('shows model fallback text when GLTF load fails', () => {
+    const renderer = createRendererStub();
+    const loader = { load: vi.fn((url, _onLoad, _onProgress, onError) => onError?.(new Error('fail'))) };
+    render(
+      <SceneRoot
+        rendererFactory={() => renderer}
+        loaderFactory={() => loader}
+        skipSupportCheck
+      />,
+    );
+    expect(screen.getByText(/scene model unavailable/i)).toBeInTheDocument();
   });
 });
