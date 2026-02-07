@@ -5,10 +5,15 @@ import {
   SettingsProvider,
   useSettings,
 } from '../app/providers/SettingsProvider';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 
 function renderSettingsHook() {
   return renderHook(() => useSettings(), {
-    wrapper: ({ children }) => <SettingsProvider>{children}</SettingsProvider>,
+    wrapper: ({ children }) => (
+      <ErrorNotificationsProvider>
+        <SettingsProvider>{children}</SettingsProvider>
+      </ErrorNotificationsProvider>
+    ),
   });
 }
 

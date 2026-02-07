@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { useFeatureFlags } from './FeatureFlagsProvider';
+import { useErrorNotifications } from './ErrorNotificationsProvider';
 
 export type MockUser = {
   id: string;
@@ -30,7 +31,7 @@ const mockUser: MockUser = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-function readStoredUser(): MockUser | null {
+function readStoredUser(onError?: (message: string) => void): MockUser | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -40,12 +41,13 @@ function readStoredUser(): MockUser | null {
       return parsed;
     }
   } catch (error) {
+    onError?.('Session could not be restored; please sign in again.');
     console.warn('Failed to parse stored mock user', error);
   }
   return null;
 }
 
-function writeStoredUser(user: MockUser | null) {
+function writeStoredUser(user: MockUser | null, onError?: (message: string) => void) {
   if (typeof window === 'undefined') return;
   try {
     if (user) {
@@ -54,21 +56,23 @@ function writeStoredUser(user: MockUser | null) {
       window.localStorage.removeItem(STORAGE_KEY);
     }
   } catch (error) {
+    onError?.('Session could not be saved.');
     console.warn('Failed to write mock user', error);
   }
 }
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const flags = useFeatureFlags();
+  const { notifyError } = useErrorNotifications();
   const [user, setUser] = useState<MockUser | null>(null);
 
   useEffect(() => {
     if (!flags.USE_MOCK_AUTH) return;
-    const stored = readStoredUser();
+    const stored = readStoredUser(notifyError);
     if (stored) {
       setUser(stored);
     }
-  }, [flags.USE_MOCK_AUTH]);
+  }, [flags.USE_MOCK_AUTH, notifyError]);
 
   const login = useCallback(() => {
     if (!flags.USE_MOCK_AUTH) {
@@ -78,14 +82,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return mockUser;
     }
     setUser(mockUser);
-    writeStoredUser(mockUser);
+    writeStoredUser(mockUser, notifyError);
     return mockUser;
-  }, [flags.USE_MOCK_AUTH]);
+  }, [flags.USE_MOCK_AUTH, notifyError]);
 
   const logout = useCallback(() => {
     setUser(null);
-    writeStoredUser(null);
-  }, []);
+    writeStoredUser(null, notifyError);
+  }, [notifyError]);
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, login, logout }),

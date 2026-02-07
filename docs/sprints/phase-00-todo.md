@@ -22,8 +22,10 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Added deterministic mock rooms list with CTA linking to hottest room and tests covering list rendering and CTA target.
 - [x] Implement shell layout with settings panel; persist settings locally (e.g., audio/graphics/controls toggles) and reload to verify persistence.
 	- Added SettingsProvider with localStorage persistence, SettingsPanel drawer wired to shell nav, and tests for provider, panel, and integration.
-- [ ] Add responsive styles for mobile (≥360px) and desktop breakpoints; verify layout for navigation and overlays.
-- [ ] Add global error toast/fallback handling for mock provider failures.
+- [x] Add responsive styles for mobile (≥360px) and desktop breakpoints; verify layout for navigation and overlays.
+	- Nav stacks on mobile with sticky top bar, adjusted paddings, and overlay components constrained to viewport widths.
+- [x] Add global error toast/fallback handling for mock provider failures.
+	- Added error notifications provider with toast stack, storage failure notifications, and an app-level error boundary with reload/reset controls.
 
 ## Backend Tasks (if applicable)
 - [ ] Mark backend scope as N/A for Phase 0; create placeholder `apps/server` package directory with README noting backend starts Phase 4.

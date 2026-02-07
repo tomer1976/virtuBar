@@ -30,6 +30,9 @@ a {
   width: 240px;
   padding: var(--space-6);
   background: var(--color-nav);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .app-content {
@@ -41,10 +44,13 @@ a {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .nav-item {
-  margin-bottom: var(--space-2);
+  margin: 0;
 }
 
 .page-card {
@@ -78,4 +84,60 @@ a {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   font-size: 0.95rem;
+}
+
+.toast-stack {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 40;
+  max-width: min(420px, 90vw);
+}
+
+.toast-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .app-nav {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .app-content {
+    padding: var(--space-4);
+  }
+
+  .page-card {
+    padding: var(--space-4);
+  }
+
+  .toast-stack {
+    left: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .toast-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }

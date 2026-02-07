@@ -1,15 +1,18 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AuthProvider, AUTH_STORAGE_KEY, mockUser, useAuth } from '../app/providers/AuthProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 
 describe('AuthProvider', () => {
   function Wrapper() {
     return (
-      <FeatureFlagsProvider>
-        <AuthProvider>
-          <Consumer />
-        </AuthProvider>
-      </FeatureFlagsProvider>
+      <ErrorNotificationsProvider>
+        <FeatureFlagsProvider>
+          <AuthProvider>
+            <Consumer />
+          </AuthProvider>
+        </FeatureFlagsProvider>
+      </ErrorNotificationsProvider>
     );
   }
 

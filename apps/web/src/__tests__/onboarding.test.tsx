@@ -6,17 +6,20 @@ import {
   ProfileProvider,
   defaultProfile,
 } from '../app/providers/ProfileProvider';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 import OnboardingPage from '../pages/OnboardingPage';
 
 function renderPage() {
   return render(
-    <FeatureFlagsProvider>
-      <AuthProvider>
-        <ProfileProvider>
-          <OnboardingPage />
-        </ProfileProvider>
-      </AuthProvider>
-    </FeatureFlagsProvider>,
+    <ErrorNotificationsProvider>
+      <FeatureFlagsProvider>
+        <AuthProvider>
+          <ProfileProvider>
+            <OnboardingPage />
+          </ProfileProvider>
+        </AuthProvider>
+      </FeatureFlagsProvider>
+    </ErrorNotificationsProvider>,
   );
 }
 

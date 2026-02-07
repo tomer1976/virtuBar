@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import App from '../App';
 import { BrowserRouter } from 'react-router-dom';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 
 describe('Settings drawer integration', () => {
   beforeEach(() => {
@@ -9,9 +10,11 @@ describe('Settings drawer integration', () => {
 
   it('opens settings drawer and persists toggle', () => {
     render(
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>,
+      <ErrorNotificationsProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ErrorNotificationsProvider>,
     );
 
     fireEvent.click(screen.getByText(/Settings/i));

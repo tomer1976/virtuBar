@@ -6,13 +6,16 @@ import {
   ProfileProvider,
   useProfile,
 } from '../app/providers/ProfileProvider';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 
 function renderProfileHook() {
   return renderHook(() => useProfile(), {
     wrapper: ({ children }) => (
-      <FeatureFlagsProvider>
-        <ProfileProvider>{children}</ProfileProvider>
-      </FeatureFlagsProvider>
+      <ErrorNotificationsProvider>
+        <FeatureFlagsProvider>
+          <ProfileProvider>{children}</ProfileProvider>
+        </FeatureFlagsProvider>
+      </ErrorNotificationsProvider>
     ),
   });
 }

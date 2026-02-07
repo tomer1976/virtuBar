@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { useErrorNotifications } from './ErrorNotificationsProvider';
 
 export type Settings = {
   audioMuted: boolean;
@@ -29,7 +30,7 @@ const defaultSettings: Settings = {
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 
-function readStoredSettings(): Settings | null {
+function readStoredSettings(onError?: (message: string) => void): Settings | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -39,44 +40,52 @@ function readStoredSettings(): Settings | null {
       return { ...defaultSettings, ...parsed };
     }
   } catch (error) {
+    onError?.('Settings data could not be loaded; defaults restored.');
     console.warn('Failed to parse stored settings', error);
   }
   return null;
 }
 
-function writeStoredSettings(settings: Settings) {
+function writeStoredSettings(settings: Settings, onError?: (message: string) => void) {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   } catch (error) {
+    onError?.('Settings could not be saved.');
     console.warn('Failed to write settings', error);
   }
 }
 
 export function SettingsProvider({ children }: PropsWithChildren) {
+  const { notifyError } = useErrorNotifications();
   const [settings, setSettings] = useState<Settings>(defaultSettings);
 
   useEffect(() => {
-    const stored = readStoredSettings();
+    const stored = readStoredSettings(notifyError);
     if (stored) {
       setSettings(stored);
     }
-  }, []);
+  }, [notifyError]);
 
   const updateSettings = useCallback((partial: Partial<Settings>) => {
     setSettings((prev) => {
       const next = { ...prev, ...partial };
-      writeStoredSettings(next);
+      writeStoredSettings(next, notifyError);
       return next;
     });
-  }, []);
+  }, [notifyError]);
 
   const resetSettings = useCallback(() => {
     setSettings(defaultSettings);
     if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(STORAGE_KEY);
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        notifyError('Settings could not be cleared.');
+        console.warn('Failed to clear settings', error);
+      }
     }
-  }, []);
+  }, [notifyError]);
 
   const value = useMemo<SettingsContextValue>(
     () => ({ settings, updateSettings, resetSettings }),

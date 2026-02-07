@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { useFeatureFlags } from './FeatureFlagsProvider';
+import { useErrorNotifications } from './ErrorNotificationsProvider';
 
 export type MockProfile = {
   displayName: string;
@@ -32,7 +33,7 @@ const defaultProfile: MockProfile = {
 
 const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
 
-function readStoredProfile(): MockProfile | null {
+function readStoredProfile(onError?: (message: string) => void): MockProfile | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -42,51 +43,59 @@ function readStoredProfile(): MockProfile | null {
       return { ...defaultProfile, ...parsed };
     }
   } catch (error) {
+    onError?.('Profile data could not be loaded; defaults restored.');
     console.warn('Failed to parse stored mock profile', error);
   }
   return null;
 }
 
-function writeStoredProfile(profile: MockProfile) {
+function writeStoredProfile(profile: MockProfile, onError?: (message: string) => void) {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
   } catch (error) {
+    onError?.('Profile changes could not be saved.');
     console.warn('Failed to write mock profile', error);
   }
 }
 
 export function ProfileProvider({ children }: PropsWithChildren) {
   const flags = useFeatureFlags();
+  const { notifyError } = useErrorNotifications();
   const [profile, setProfile] = useState<MockProfile>(defaultProfile);
 
   useEffect(() => {
     if (!flags.USE_MOCK_PROFILE) return;
-    const stored = readStoredProfile();
+    const stored = readStoredProfile(notifyError);
     if (stored) {
       setProfile(stored);
     }
-  }, [flags.USE_MOCK_PROFILE]);
+  }, [flags.USE_MOCK_PROFILE, notifyError]);
 
   const updateProfile = useCallback(
     (partial: Partial<MockProfile>) => {
       setProfile((prev) => {
         const next = { ...prev, ...partial };
         if (flags.USE_MOCK_PROFILE) {
-          writeStoredProfile(next);
+          writeStoredProfile(next, notifyError);
         }
         return next;
       });
     },
-    [flags.USE_MOCK_PROFILE],
+    [flags.USE_MOCK_PROFILE, notifyError],
   );
 
   const resetProfile = useCallback(() => {
     setProfile(defaultProfile);
     if (flags.USE_MOCK_PROFILE && typeof window !== 'undefined') {
-      window.localStorage.removeItem(STORAGE_KEY);
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch (error) {
+        notifyError('Profile could not be cleared.');
+        console.warn('Failed to clear profile', error);
+      }
     }
-  }, [flags.USE_MOCK_PROFILE]);
+  }, [flags.USE_MOCK_PROFILE, notifyError]);
 
   const value = useMemo<ProfileContextValue>(
     () => ({ profile, updateProfile, resetProfile }),

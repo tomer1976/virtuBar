@@ -1,12 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import SettingsPanel from '../app/components/SettingsPanel';
 import { SettingsProvider, SETTINGS_STORAGE_KEY } from '../app/providers/SettingsProvider';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 
 function renderPanel(open = true) {
   return render(
-    <SettingsProvider>
-      <SettingsPanel open={open} onClose={() => {}} />
-    </SettingsProvider>,
+    <ErrorNotificationsProvider>
+      <SettingsProvider>
+        <SettingsPanel open={open} onClose={() => {}} />
+      </SettingsProvider>
+    </ErrorNotificationsProvider>,
   );
 }
 

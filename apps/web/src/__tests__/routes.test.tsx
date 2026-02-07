@@ -4,20 +4,23 @@ import { AuthProvider } from '../app/providers/AuthProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
 import { ProfileProvider } from '../app/providers/ProfileProvider';
 import { SettingsProvider } from '../app/providers/SettingsProvider';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 import { AppRoutes, routePaths } from '../routes';
 
 function renderWithRouter(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <FeatureFlagsProvider>
-        <SettingsProvider>
-          <AuthProvider>
-            <ProfileProvider>
-              <AppRoutes />
-            </ProfileProvider>
-          </AuthProvider>
-        </SettingsProvider>
-      </FeatureFlagsProvider>
+      <ErrorNotificationsProvider>
+        <FeatureFlagsProvider>
+          <SettingsProvider>
+            <AuthProvider>
+              <ProfileProvider>
+                <AppRoutes />
+              </ProfileProvider>
+            </AuthProvider>
+          </SettingsProvider>
+        </FeatureFlagsProvider>
+      </ErrorNotificationsProvider>
     </MemoryRouter>,
   );
 }
