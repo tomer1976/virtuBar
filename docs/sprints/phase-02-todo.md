@@ -8,7 +8,8 @@ Integrate a 3D bar scene with player avatar rendering, desktop/mobile controls, 
 	- Completed: Added Three.js-based `SceneRoot` with fallback-safe mount, styling, and unit tests.
 - [x] Load GLTF bar scene from `public/models`; add fallback ground plane if asset load fails.
 	- Completed: SceneRoot attempts to load `/models/bar.glb` with graceful fallback overlay when unavailable.
-- [ ] Implement lighting preset (key/fill/ambient) tuned for performance; add shadow toggle for low/med quality modes.
+- [x] Implement lighting preset (key/fill/ambient) tuned for performance; add shadow toggle for low/med quality modes.
+	- Completed: Quality-aware lighting presets with shadows disabled on low and pixel ratio tuned by graphics setting.
 - [ ] Implement player avatar rendering with idle/walk animations; hook to input-driven velocity.
 - [ ] Add desktop controls: WASD + mouse look with sensitivity setting; clamp pitch to avoid gimbal lock.
 - [ ] Add mobile controls: joystick + look drag; ensure UI placement doesn’t conflict with HUD overlays.

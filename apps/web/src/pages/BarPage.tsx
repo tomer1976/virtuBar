@@ -22,7 +22,7 @@ function BarPage() {
       </div>
 
       <div className="scene-shell" aria-label="Bar 3D viewport">
-        <SceneRoot />
+        <SceneRoot quality={settings.graphicsQuality} />
       </div>
 
       <div

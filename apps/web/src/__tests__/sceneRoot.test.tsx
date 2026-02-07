@@ -49,8 +49,15 @@ describe('SceneRoot', () => {
         rendererFactory={() => renderer}
         loaderFactory={() => loader}
         skipSupportCheck
+        loadScene
       />,
     );
     expect(screen.getByText(/scene model unavailable/i)).toBeInTheDocument();
+  });
+
+  it('disables shadows for low quality', () => {
+    const renderer = createRendererStub();
+    render(<SceneRoot rendererFactory={() => renderer} skipSupportCheck loadScene={false} quality="low" />);
+    expect(renderer.shadowMap.enabled).toBe(false);
   });
 });

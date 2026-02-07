@@ -23,6 +23,7 @@ type SceneRootProps = {
   gltfUrl?: string;
   loaderFactory?: () => GltfLoader;
   loadScene?: boolean;
+  quality?: 'low' | 'medium' | 'high';
 };
 
 const defaultRendererFactory = (options: RendererFactoryOptions): RendererLike =>
@@ -38,6 +39,12 @@ type GltfLoader = {
 };
 
 const defaultLoaderFactory = (): GltfLoader => new GLTFLoader();
+
+const lightingPresets: Record<'low' | 'medium' | 'high', { ambient: number; hemi: number; key: number }> = {
+  low: { ambient: 0.25, hemi: 0.25, key: 0.7 },
+  medium: { ambient: 0.32, hemi: 0.35, key: 1 },
+  high: { ambient: 0.35, hemi: 0.45, key: 1.1 },
+};
 
 function supportsWebGL(): boolean {
   try {
@@ -66,6 +73,7 @@ function SceneRoot({
   skipSupportCheck = false,
   gltfUrl = '/models/bar.glb',
   loadScene = true,
+  quality = 'high',
 }: SceneRootProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
@@ -100,8 +108,10 @@ function SceneRoot({
     }
 
     const { width, height } = measureSize(mountEl);
-    renderer.shadowMap.enabled = enableShadows;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const shadowsEnabled = enableShadows && quality !== 'low';
+    renderer.shadowMap.enabled = shadowsEnabled;
+    const pixelRatio = quality === 'high' ? Math.min(window.devicePixelRatio || 1, 2) : quality === 'medium' ? 1.25 : 1;
+    renderer.setPixelRatio(pixelRatio);
     renderer.setSize(width, height, false);
 
     const scene = new THREE.Scene();
@@ -110,9 +120,13 @@ function SceneRoot({
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
     camera.position.set(0, 1.6, 4);
 
+    const preset = lightingPresets[quality] ?? lightingPresets.high;
     const { ambient, hemi, key } = lights;
+    ambient.intensity = preset.ambient;
+    hemi.intensity = preset.hemi;
+    key.intensity = preset.key;
     key.position.set(2.5, 4, 1.5);
-    key.castShadow = enableShadows;
+    key.castShadow = shadowsEnabled;
 
     scene.add(ambient, hemi, key);
 
@@ -121,7 +135,7 @@ function SceneRoot({
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.5;
-    floor.receiveShadow = enableShadows;
+    floor.receiveShadow = shadowsEnabled;
     scene.add(floor);
 
     const platformGeometry = new THREE.BoxGeometry(1.4, 0.6, 1.4);
@@ -133,8 +147,8 @@ function SceneRoot({
     });
     const platform = new THREE.Mesh(platformGeometry, platformMaterial);
     platform.position.set(0, 0.3, 0);
-    platform.castShadow = enableShadows;
-    platform.receiveShadow = enableShadows;
+    platform.castShadow = shadowsEnabled;
+    platform.receiveShadow = shadowsEnabled;
     scene.add(platform);
 
     let loadedScene: THREE.Object3D | null = null;
@@ -147,8 +161,8 @@ function SceneRoot({
             loadedScene = gltf.scene;
             gltf.scene.traverse((node) => {
               const object = node as THREE.Object3D;
-              object.castShadow = enableShadows;
-              object.receiveShadow = enableShadows;
+              object.castShadow = shadowsEnabled;
+              object.receiveShadow = shadowsEnabled;
             });
             scene.add(gltf.scene);
           },
@@ -205,7 +219,7 @@ function SceneRoot({
       floorMaterial.dispose();
       renderer = null;
     };
-  }, [enableShadows, gltfUrl, lights, loadScene, loaderFactory, rendererFactory, skipSupportCheck]);
+  }, [enableShadows, gltfUrl, lights, loadScene, loaderFactory, quality, rendererFactory, skipSupportCheck]);
 
   return (
     <div className="scene-root" ref={mountRef} data-testid="scene-root">
