@@ -32,23 +32,32 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Added apps/server/README.md noting backend begins Phase 4+; no server code in Phase 0.
 
 ## Realtime Tasks (if applicable)
-- [ ] Mark realtime scope as N/A for Phase 0; ensure mock realtime flag (`USE_MOCK_REALTIME`) remains true and no WS code is included yet.
+- [x] Mark realtime scope as N/A for Phase 0; ensure mock realtime flag (`USE_MOCK_REALTIME`) remains true and no WS code is included yet.
+	- Kept realtime flag default true; no websocket code added in Phase 0.
 
 ## Voice Tasks (if applicable)
-- [ ] Mark voice scope as N/A for Phase 0; ensure mock voice flag (`USE_MOCK_VOICE`) remains true and UI toggles are non-functional.
+- [x] Mark voice scope as N/A for Phase 0; ensure mock voice flag (`USE_MOCK_VOICE`) remains true and UI toggles are non-functional.
+	- Voice flag remains default true; voice UI stays placeholder-only.
 
 ## Infrastructure / DevOps Tasks (if applicable)
-- [ ] Initialize repo tooling (package manager config, lint/prettier base) for frontend only; note backend infra deferred to later phases.
-- [ ] Add baseline scripts for running web app in dev mode.
+- [x] Initialize repo tooling (package manager config, lint/prettier base) for frontend only; note backend infra deferred to later phases.
+	- Root workspace scripts point to apps/web; lint/typecheck/test wired via workspace scripts; backend infra deferred.
+- [x] Add baseline scripts for running web app in dev mode.
+	- Root script `web:dev` delegates to apps/web `dev` (Vite).
 
 ## State & Mock Replacement Tasks
-- [ ] Document mock providers (auth/profile/rooms/realtime/voice) and confirm all feature flags default to mock implementations.
-- [ ] Ensure mock data sets (rooms, users) are deterministic or seeded for repeatable demos.
+- [x] Document mock providers (auth/profile/rooms/realtime/voice) and confirm all feature flags default to mock implementations.
+	- Added docs/mocks.md summarizing mock providers and defaults.
+- [x] Ensure mock data sets (rooms, users) are deterministic or seeded for repeatable demos.
+	- Static mock datasets and deterministic ids persisted via localStorage.
 
 ## File-Level Guidance
-- [ ] Create `docs/sprints/` folder entries for this phase (already generated) and ensure README/changelog updated if needed.
-- [ ] Populate `apps/web/src` with route components and UI kit directories per `file-structure.md` conventions.
-- [ ] Add `packages/shared` with placeholder types to be expanded later.
+- [x] Create `docs/sprints/` folder entries for this phase (already generated) and ensure README/changelog updated if needed.
+	- Sprint docs present for phase 00–15.
+- [x] Populate `apps/web/src` with route components and UI kit directories per `file-structure.md` conventions.
+	- Routes, providers, and UI kit directories populated under apps/web/src.
+- [x] Add `packages/shared` with placeholder types to be expanded later.
+	- Added packages/shared with placeholder types and README.
 - [x] Add `apps/server` placeholder with note of future activation (Phase 4+).
 	- Placeholder README added under apps/server.
 
