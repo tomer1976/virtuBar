@@ -98,7 +98,7 @@ function SceneRoot({
   rendererFactory = defaultRendererFactory,
   loaderFactory = defaultLoaderFactory,
   skipSupportCheck = false,
-  gltfUrl = '/models/bar.glb',
+  gltfUrl = '/models/bar_venue_50p_avatar_scaled.glb',
   loadScene = true,
   quality = 'high',
   mobileMoveRef,
@@ -113,7 +113,7 @@ function SceneRoot({
   roomMembers,
   sendTransform,
   realtimeProvider,
-}: SceneRootProps) {
+}: SceneRootProps): JSX.Element {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
@@ -206,25 +206,146 @@ function SceneRoot({
     floor.receiveShadow = shadowsEnabled;
     scene.add(floor);
 
-    const platformGeometry = new THREE.BoxGeometry(1.4, 0.6, 1.4);
-    const platformMaterial = new THREE.MeshStandardMaterial({
-      color: 0x2563eb,
-      emissive: 0x0b1224,
-      metalness: 0.15,
-      roughness: 0.35,
-    });
-    const platform = new THREE.Mesh(platformGeometry, platformMaterial);
-    platform.position.set(0, 0.3, 0);
-    platform.castShadow = shadowsEnabled;
-    platform.receiveShadow = shadowsEnabled;
-    scene.add(platform);
+    const staticObstacles: { center: THREE.Vector3; half: THREE.Vector3 }[] = [];
 
-    const staticObstacles: { position: THREE.Vector3; radius: number }[] = [
-      { position: platform.position.clone(), radius: 0.9 },
-    ];
+    let navBoundary: THREE.Sphere | null = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 4.2);
+    const separationVector = new THREE.Vector3();
 
-    const npcTorsoGeometry = new THREE.CapsuleGeometry(0.22, 0.55, 4, 8);
-    const npcHeadGeometry = new THREE.SphereGeometry(0.18, 14, 10);
+    const applyObstaclePush = (pos: THREE.Vector3, radius: number) => {
+      if (!staticObstacles.length) return;
+      for (const obstacle of staticObstacles) {
+        const dx = pos.x - obstacle.center.x;
+        const dz = pos.z - obstacle.center.z;
+        const px = obstacle.half.x + radius;
+        const pz = obstacle.half.z + radius;
+        if (Math.abs(dx) > px || Math.abs(dz) > pz) continue;
+
+        const penX = px - Math.abs(dx);
+        const penZ = pz - Math.abs(dz);
+        if (penX < penZ) {
+          pos.x = obstacle.center.x + Math.sign(dx || 1) * px;
+        } else {
+          pos.z = obstacle.center.z + Math.sign(dz || 1) * pz;
+        }
+      }
+    };
+
+    const clampToNavBoundary = (pos: THREE.Vector3, radius: number) => {
+      if (!navBoundary) return;
+      separationVector.subVectors(pos, navBoundary.center);
+      const dist = separationVector.length();
+      const maxDist = Math.max(navBoundary.radius - radius, 0.5);
+      if (dist > maxDist) {
+        separationVector.setLength(maxDist);
+        pos.copy(navBoundary.center).add(separationVector);
+      }
+    };
+
+    const pelvisGeometry = new THREE.BoxGeometry(0.34, 0.16, 0.24);
+    const torsoGeometry = new THREE.BoxGeometry(0.38, 0.52, 0.26);
+    const armGeometry = new THREE.CylinderGeometry(0.07, 0.07, 0.45, 10);
+    const legGeometry = new THREE.CylinderGeometry(0.09, 0.09, 0.55, 12);
+    const handGeometry = new THREE.SphereGeometry(0.07, 10, 10);
+    const footGeometry = new THREE.BoxGeometry(0.18, 0.08, 0.32);
+    const headGeometry = new THREE.SphereGeometry(0.18, 14, 12);
+    const eyeGeometry = new THREE.SphereGeometry(0.03, 8, 8);
+    const noseGeometry = new THREE.BoxGeometry(0.04, 0.04, 0.04);
+    const mouthGeometry = new THREE.BoxGeometry(0.1, 0.03, 0.02);
+
+    const buildHumanoidAvatar = (options: {
+      torsoColor: number;
+      skinColor: number;
+      pantsColor: number;
+      shoeColor: number;
+      headColor: number;
+      accentColor?: number;
+    }) => {
+      const materials: THREE.Material[] = [];
+      const makeMaterial = (color: number, metalness = 0.06, roughness = 0.5) => {
+        const mat = new THREE.MeshStandardMaterial({ color, metalness, roughness });
+        materials.push(mat);
+        return mat;
+      };
+      const addMesh = (geometry: THREE.BufferGeometry, material: THREE.Material) => {
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = shadowsEnabled;
+        mesh.receiveShadow = shadowsEnabled;
+        return mesh;
+      };
+
+      const group = new THREE.Group();
+
+      const leftLeg = addMesh(legGeometry, makeMaterial(options.pantsColor, 0.08, 0.55));
+      leftLeg.position.set(-0.12, 0.275, 0);
+      const rightLeg = addMesh(legGeometry, makeMaterial(options.pantsColor, 0.08, 0.55));
+      rightLeg.position.set(0.12, 0.275, 0);
+
+      const leftFoot = addMesh(footGeometry, makeMaterial(options.shoeColor, 0.1, 0.6));
+      leftFoot.position.set(-0.12, 0.04, 0.07);
+      const rightFoot = addMesh(footGeometry, makeMaterial(options.shoeColor, 0.1, 0.6));
+      rightFoot.position.set(0.12, 0.04, 0.07);
+
+      const pelvis = addMesh(pelvisGeometry, makeMaterial(options.pantsColor, 0.07, 0.52));
+      pelvis.position.set(0, 0.63, 0);
+
+      const torso = addMesh(torsoGeometry, makeMaterial(options.torsoColor, 0.08, 0.48));
+      torso.position.set(0, 0.97, 0);
+
+      const leftArm = addMesh(armGeometry, makeMaterial(options.torsoColor, 0.08, 0.48));
+      leftArm.position.set(-0.32, 0.98, 0);
+      leftArm.rotation.z = 0.12;
+      const rightArm = addMesh(armGeometry, makeMaterial(options.torsoColor, 0.08, 0.48));
+      rightArm.position.set(0.32, 0.98, 0);
+      rightArm.rotation.z = -0.12;
+
+      const leftHand = addMesh(handGeometry, makeMaterial(options.skinColor, 0.05, 0.62));
+      leftHand.position.set(-0.32, 0.74, 0);
+      const rightHand = addMesh(handGeometry, makeMaterial(options.skinColor, 0.05, 0.62));
+      rightHand.position.set(0.32, 0.74, 0);
+
+      const head = addMesh(headGeometry, makeMaterial(options.headColor, 0.05, 0.6));
+      head.position.set(0, 1.33, 0);
+
+      const eyeMaterial = makeMaterial(0x0f172a, 0.02, 0.35);
+      const leftEye = addMesh(eyeGeometry, eyeMaterial);
+      leftEye.position.set(-0.05, 1.34, 0.17);
+      const rightEye = addMesh(eyeGeometry, eyeMaterial);
+      rightEye.position.set(0.05, 1.34, 0.17);
+
+      const nose = addMesh(noseGeometry, makeMaterial(options.headColor, 0.03, 0.6));
+      nose.position.set(0, 1.3, 0.18);
+      const mouth = addMesh(mouthGeometry, makeMaterial(options.accentColor ?? 0xd946ef, 0.04, 0.4));
+      mouth.position.set(0, 1.23, 0.17);
+
+      const hairColor = options.accentColor ?? 0x475569;
+      const hair = addMesh(
+        new THREE.SphereGeometry(0.19, 12, 10, 0, Math.PI * 2, 0, Math.PI / 1.3),
+        makeMaterial(hairColor, 0.08, 0.5),
+      );
+      hair.position.set(0, 1.38, 0);
+      hair.scale.set(1, 0.6, 1);
+
+      group.add(
+        leftLeg,
+        rightLeg,
+        leftFoot,
+        rightFoot,
+        pelvis,
+        torso,
+        leftArm,
+        rightArm,
+        leftHand,
+        rightHand,
+        head,
+        leftEye,
+        rightEye,
+        nose,
+        mouth,
+        hair,
+      );
+
+      return { group, materials };
+    };
     const npcMaterials: THREE.Material[] = [];
     const npcGroups: THREE.Group[] = [];
     const npcSeed = quality === 'high' ? 4242 : quality === 'medium' ? 3141 : 2027;
@@ -262,29 +383,21 @@ function SceneRoot({
       if (!member || member.userId === selfUserId) return null;
       let entry = remoteAvatars.get(member.userId);
       if (!entry) {
-        const group = new THREE.Group();
-        group.userData.userId = member.userId;
-        const torsoMaterial = new THREE.MeshStandardMaterial({
-          color: remoteColorForUser(member.userId),
-          metalness: 0.05,
-          roughness: 0.45,
+        const { group, materials } = buildHumanoidAvatar({
+          torsoColor: remoteColorForUser(member.userId),
+          skinColor: 0xe8d5b5,
+          pantsColor: 0x111827,
+          shoeColor: 0x0f172a,
+          headColor: 0xf8fafc,
+          accentColor: 0x7c3aed,
         });
-        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.04, roughness: 0.6 });
-        const torso = new THREE.Mesh(npcTorsoGeometry, torsoMaterial);
-        torso.castShadow = shadowsEnabled;
-        torso.receiveShadow = shadowsEnabled;
-        const head = new THREE.Mesh(npcHeadGeometry, headMaterial);
-        head.position.set(0, 0.58, 0);
-        head.castShadow = shadowsEnabled;
-        head.receiveShadow = shadowsEnabled;
-        group.add(torso);
-        group.add(head);
+        group.userData.userId = member.userId;
         scene.add(group);
         remoteAvatarGroups.push(group);
         entry = {
           group,
           smoother: new TransformSmoother({ bufferMs: 120, snapDistance: 1.8, snapRotation: Math.PI / 1.4 }),
-          materials: [torsoMaterial, headMaterial],
+          materials,
         };
         remoteAvatars.set(member.userId, entry);
       }
@@ -367,22 +480,16 @@ function SceneRoot({
 
     const spawnNpc = (stateIndex: number) => {
       const state = npcStates[stateIndex];
-      const group = new THREE.Group();
+      const { group, materials } = buildHumanoidAvatar({
+        torsoColor: state.color,
+        skinColor: 0xe8d5b5,
+        pantsColor: 0x111827,
+        shoeColor: 0x0f172a,
+        headColor: 0xf8fafc,
+        accentColor: 0x94a3b8,
+      });
       group.userData.npcIndex = stateIndex;
-      const torsoMaterial = new THREE.MeshStandardMaterial({ color: state.color, metalness: 0.04, roughness: 0.55 });
-      const headMaterial = new THREE.MeshStandardMaterial({ color: 0xe5e7eb, metalness: 0.02, roughness: 0.65 });
-      npcMaterials.push(torsoMaterial, headMaterial);
-
-      const torso = new THREE.Mesh(npcTorsoGeometry, torsoMaterial);
-      torso.castShadow = shadowsEnabled;
-      torso.receiveShadow = shadowsEnabled;
-      const head = new THREE.Mesh(npcHeadGeometry, headMaterial);
-      head.position.set(0, 0.58, 0);
-      head.castShadow = shadowsEnabled;
-      head.receiveShadow = shadowsEnabled;
-
-      group.add(torso);
-      group.add(head);
+      npcMaterials.push(...materials);
       group.position.copy(state.position);
       npcGroups.push(group);
       scene.add(group);
@@ -393,6 +500,9 @@ function SceneRoot({
     }
 
     let loadedScene: THREE.Object3D | null = null;
+    const venueScale = 1.5;
+    const navMargin = 0.5;
+
     if (loadScene && gltfUrl) {
       try {
         const loader = loaderFactory();
@@ -400,18 +510,75 @@ function SceneRoot({
           gltfUrl,
           (gltf) => {
             loadedScene = gltf.scene;
+            gltf.scene.scale.setScalar(venueScale);
+
+            const obstacleMeshes: THREE.Mesh[] = [];
+            const obstacleBlacklist = ['Floor', 'Ceiling', 'Door'];
+
             gltf.scene.traverse((node) => {
               const object = node as THREE.Object3D;
+              const name = object.name ?? '';
+
+              if (name.startsWith('Chair')) {
+                object.scale.multiplyScalar(1.0);
+              } else if (name.startsWith('Table')) {
+                object.scale.multiplyScalar(1.0);
+              } else if (name.startsWith('BarCounter')) {
+                object.scale.x *= 1.05;
+                object.scale.y *= 1.15;
+                object.scale.z *= 1.05;
+              }
+
+              if (object instanceof THREE.Mesh) {
+                if (!obstacleBlacklist.some((prefix) => name.startsWith(prefix))) {
+                  obstacleMeshes.push(object);
+                }
+              }
+
               object.castShadow = shadowsEnabled;
               object.receiveShadow = shadowsEnabled;
             });
+
+            gltf.scene.updateMatrixWorld(true);
             scene.add(gltf.scene);
+
+            for (const mesh of obstacleMeshes) {
+              const box = new THREE.Box3().setFromObject(mesh);
+              const center = box.getCenter(new THREE.Vector3());
+              const half = box.getSize(new THREE.Vector3()).multiplyScalar(0.5);
+              if (!Number.isFinite(half.x) || !Number.isFinite(half.z)) continue;
+              if (half.x > 4 || half.z > 4) continue;
+              half.x += 0.08;
+              half.z += 0.08;
+              staticObstacles.push({ center, half });
+            }
 
             const bounds = new THREE.Box3().setFromObject(gltf.scene);
             const sphere = bounds.getBoundingSphere(new THREE.Sphere());
             if (sphere.radius > 0 && Number.isFinite(sphere.radius)) {
-              staticObstacles.push({ position: sphere.center.clone(), radius: sphere.radius + 0.6 });
+              const radius = Math.max(2.4, sphere.radius - navMargin);
+              navBoundary = new THREE.Sphere(sphere.center.clone(), radius);
+              if (playerRef.current) {
+                playerRef.current.position.set(sphere.center.x, playerRef.current.position.y, sphere.center.z);
+                applyObstaclePush(playerRef.current.position, 0.32);
+                clampToNavBoundary(playerRef.current.position, 0.32);
+              }
+              for (let i = 0; i < npcGroups.length; i += 1) {
+                const npc = npcGroups[i];
+                npc.position.set(sphere.center.x, npc.position.y, sphere.center.z);
+                applyObstaclePush(npc.position, 0.32);
+                clampToNavBoundary(npc.position, 0.32);
+                const state = npcStates[i];
+                if (state) state.position.copy(npc.position);
+              }
+              for (let i = 0; i < remoteAvatarGroups.length; i += 1) {
+                const remote = remoteAvatarGroups[i];
+                remote.position.set(sphere.center.x, remote.position.y, sphere.center.z);
+                applyObstaclePush(remote.position, 0.32);
+                clampToNavBoundary(remote.position, 0.32);
+              }
             }
+
           },
           undefined,
           (error) => {
@@ -467,26 +634,17 @@ function SceneRoot({
     };
 
     const createPlayer = () => {
-      const group = new THREE.Group();
-      const torso = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.28, 0.65, 4, 8),
-        new THREE.MeshStandardMaterial({ color: 0x7dd3fc, metalness: 0.05, roughness: 0.5 }),
-      );
-      torso.castShadow = shadowsEnabled;
-      torso.receiveShadow = shadowsEnabled;
-
-      const head = new THREE.Mesh(
-        new THREE.SphereGeometry(0.2, 16, 12),
-        new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.05, roughness: 0.6 }),
-      );
-      head.position.set(0, 0.65, 0);
-      head.castShadow = shadowsEnabled;
-      head.receiveShadow = shadowsEnabled;
-
-      group.add(torso);
-      group.add(head);
+      const { group, materials } = buildHumanoidAvatar({
+        torsoColor: 0x7dd3fc,
+        skinColor: 0xe8d5b5,
+        pantsColor: 0x1f2937,
+        shoeColor: 0x0f172a,
+        headColor: 0xe2e8f0,
+        accentColor: 0x38bdf8,
+      });
+      npcMaterials.push(...materials);
       group.userData.isPlayer = true;
-      group.position.set(0, 0.3, 0);
+      group.position.set(0, 0, 0);
       playerRef.current = group;
       scene.add(group);
     };
@@ -501,7 +659,6 @@ function SceneRoot({
     const speed = quality === 'low' ? 2.1 : 2.6;
     const separationRadius = 0.8;
     const npcSeparationRadius = 0.7;
-    const separationVector = new THREE.Vector3();
     const fpsMeter = createFpsMeter();
     const unsubscribeTransform = realtimeProvider?.on('avatar_transform_broadcast', (event) => {
       if (event.payload.userId === selfUserId) return;
@@ -682,13 +839,21 @@ function SceneRoot({
         player.position.addScaledVector(moveVector, speed * dt);
         player.rotation.y = Math.atan2(moveVector.x, moveVector.z);
         walkPhaseRef.current += dt * 9;
-      } else if (player) {
-        walkPhaseRef.current = 0;
       }
 
-      if (player && npcGroups.length) {
-        for (let i = 0; i < npcGroups.length; i += 1) {
-          const npc = npcGroups[i];
+      if (player) {
+        applyObstaclePush(player.position, 0.32);
+        clampToNavBoundary(player.position, 0.32);
+      }
+
+      for (let i = 0; i < npcGroups.length; i += 1) {
+        const npc = npcGroups[i];
+        applyObstaclePush(npc.position, 0.32);
+        clampToNavBoundary(npc.position, 0.32);
+        const state = npcStates[i];
+        if (state) state.position.copy(npc.position);
+
+        if (player) {
           separationVector.subVectors(player.position, npc.position);
           separationVector.y = 0;
           let dist = separationVector.length();
@@ -700,15 +865,19 @@ function SceneRoot({
             const push = (separationRadius - dist) * 0.5;
             const dir = separationVector.normalize();
             player.position.addScaledVector(dir, push);
-            const npcState = npcStates[i];
-            if (npcState) {
-              npcState.position.addScaledVector(dir, -push);
-              npc.position.copy(npcState.position);
+            if (state) {
+              state.position.addScaledVector(dir, -push);
+              npc.position.copy(state.position);
             } else {
               npc.position.addScaledVector(dir, -push);
             }
           }
         }
+      }
+
+      for (let i = 0; i < remoteAvatarGroups.length; i += 1) {
+        applyObstaclePush(remoteAvatarGroups[i].position, 0.32);
+        clampToNavBoundary(remoteAvatarGroups[i].position, 0.32);
       }
 
       if (npcGroups.length > 1) {
@@ -734,34 +903,6 @@ function SceneRoot({
               if (bState) bState.position.copy(b.position);
             }
           }
-        }
-      }
-
-      if (staticObstacles.length) {
-        const applyObstaclePush = (pos: THREE.Vector3, radius: number) => {
-          for (const obstacle of staticObstacles) {
-            separationVector.subVectors(pos, obstacle.position);
-            separationVector.y = 0;
-            const dist = separationVector.length();
-            if (dist > obstacle.radius + radius) continue;
-            const overlap = obstacle.radius + radius - dist;
-            if (overlap <= 0) continue;
-            if (dist < 1e-4) {
-              separationVector.set(0.0001, 0, 0.0001);
-            }
-            separationVector.normalize();
-            pos.addScaledVector(separationVector, overlap);
-          }
-        };
-
-        if (player) {
-          applyObstaclePush(player.position, 0.35);
-        }
-        for (let i = 0; i < npcGroups.length; i += 1) {
-          const npc = npcGroups[i];
-          applyObstaclePush(npc.position, 0.35);
-          const state = npcStates[i];
-          if (state) state.position.copy(npc.position);
         }
       }
 
@@ -805,7 +946,6 @@ function SceneRoot({
       const fps = fpsMeter.tick(performance.now());
       fpsOverlay.textContent = `FPS: ${Number.isFinite(fps) ? fps.toFixed(0) : '--'}`;
 
-      platform.rotation.y += 0.01;
       renderer?.render(scene, camera);
       if (!usingAnimationLoop) {
         frameId = requestAnimationFrame(renderLoop);
@@ -858,7 +998,6 @@ function SceneRoot({
         scene.remove(npc);
       }
       scene.remove(cameraRig);
-      scene.remove(platform);
       scene.remove(floor);
       if (mountEl.contains(fpsOverlay)) {
         mountEl.removeChild(fpsOverlay);
@@ -871,12 +1010,18 @@ function SceneRoot({
       }
       chatBubbles.splice(0, chatBubbles.length);
       renderer?.dispose();
-      platformGeometry.dispose();
-      platformMaterial.dispose();
       floorGeometry.dispose();
       floorMaterial.dispose();
-      npcTorsoGeometry.dispose();
-      npcHeadGeometry.dispose();
+      pelvisGeometry.dispose();
+      torsoGeometry.dispose();
+      armGeometry.dispose();
+      legGeometry.dispose();
+      handGeometry.dispose();
+      footGeometry.dispose();
+      headGeometry.dispose();
+      eyeGeometry.dispose();
+      noseGeometry.dispose();
+      mouthGeometry.dispose();
       npcMaterials.forEach((mat) => mat.dispose());
       renderer = null;
     };

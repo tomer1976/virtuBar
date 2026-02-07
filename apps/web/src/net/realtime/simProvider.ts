@@ -1,12 +1,9 @@
+import { CHAT_MAX_LENGTH, DESKTOP_TRANSFORM_RATE_LIMIT, MOBILE_TRANSFORM_RATE_LIMIT, REALTIME_VERSION } from './constants';
 import {
   AvatarTransformState,
-  CHAT_MAX_LENGTH,
-  DESKTOP_TRANSFORM_RATE_LIMIT,
-  MOBILE_TRANSFORM_RATE_LIMIT,
   JoinRoomPayload,
   LocalChatPayload,
   EmotePayload,
-  REALTIME_VERSION,
   RealtimeEnvelope,
   RealtimeEventHandler,
   RealtimeProvider,

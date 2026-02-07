@@ -1,12 +1,5 @@
-import {
-  CHAT_MAX_LENGTH,
-  DESKTOP_TRANSFORM_RATE_LIMIT,
-  DeviceType,
-  MOBILE_TRANSFORM_RATE_LIMIT,
-  RealtimeEventHandler,
-  RealtimeProvider,
-  RealtimeServerEventName,
-} from './types';
+import { DeviceType, RealtimeEventHandler, RealtimeProvider, RealtimeServerEventName } from './types';
+import { CHAT_MAX_LENGTH, DESKTOP_TRANSFORM_RATE_LIMIT, MOBILE_TRANSFORM_RATE_LIMIT } from './constants';
 
 export type RateLimitedOptions = {
   deviceType?: DeviceType;

@@ -64,8 +64,11 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 	- Added smoothing stability test covering monotonic interpolation at normal update cadence (transformSmoother.test.ts).
 
 ## Cleanup & Refactor
-- [ ] Remove any ad-hoc mock movement code superseded by the simulation provider.
-- [ ] Centralize protocol constants (event names, limits) to avoid duplication.
+- [x] Remove any ad-hoc mock movement code superseded by the simulation provider.
+	- Removed nearby panel drift timer; realtime path now relies solely on provider members.
+- [x] Centralize protocol constants (event names, limits) to avoid duplication.
+	- Added apps/web/src/net/realtime/constants.ts and wired providers/tests to consume it via types re-exports.
 
 ## Handoff to Next Phase
-- [ ] Confirm provider seam is ready for Phase 7 WS implementation; document expected server contract matching `realtime-protocol.md`.
+- [x] Confirm provider seam is ready for Phase 7 WS implementation; document expected server contract matching `realtime-protocol.md`.
+	- Added Phase 7 handoff expectations to docs/realtime-protocol.md covering provider seam, env flag, auth/join flow, rate limits, ordering, and reconnect.

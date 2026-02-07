@@ -1,18 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, ProfileCardOverlay } from '.';
-import { driftNearbyUsers, generateNearbyUsers, NearbyOptions, sortNearby } from '../../state/mockNearby';
+import { generateNearbyUsers, NearbyOptions, sortNearby } from '../../state/mockNearby';
 import { RoomMemberState } from '../../net/realtime/types';
-import { createSeededRng } from '../../state/mockDataEngine';
 import { mockEngineConfig } from '../../state/mockConfig';
-import { useFeatureFlags } from '../../app/providers/FeatureFlagsProvider';
 
 type NearbyPanelProps = NearbyOptions & {
-  tickMs?: number;
   realtimeMembers?: RoomMemberState[];
   selfUserId?: string;
 };
 
-function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = mockEngineConfig.nearby.tickMs, realtimeMembers, selfUserId }: NearbyPanelProps) {
+function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, realtimeMembers, selfUserId }: NearbyPanelProps) {
   const resolvedSeed = seed ?? mockEngineConfig.seed;
   const isRealtime = Boolean(realtimeMembers);
 
@@ -21,12 +18,10 @@ function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = moc
     [resolvedSeed, count],
   );
   const [nearby, setNearby] = useState(initial);
-  const rngRef = useRef<() => number>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mutedIds, setMutedIds] = useState<Set<string>>(new Set());
   const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
-  const flags = useFeatureFlags();
 
   useEffect(() => {
     if (isRealtime && realtimeMembers) {
@@ -47,18 +42,6 @@ function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = moc
     setBlockedIds(new Set());
     setReportedIds(new Set());
   }, [initial, isRealtime, realtimeMembers]);
-
-  useEffect(() => {
-    rngRef.current = createSeededRng(`${resolvedSeed}-nearby-drift`);
-  }, [resolvedSeed]);
-
-  useEffect(() => {
-    if (isRealtime || !flags.USE_MOCK_LIVENESS) return undefined;
-    const id = window.setInterval(() => {
-      setNearby((prev) => sortNearby(driftNearbyUsers(prev, rngRef.current ?? (() => Math.random()))));
-    }, tickMs);
-    return () => window.clearInterval(id);
-  }, [tickMs, flags.USE_MOCK_LIVENESS, isRealtime]);
 
   const displayedNearby = useMemo(
     () => nearby.filter((user) => !blockedIds.has(user.id)),
@@ -99,7 +82,7 @@ function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = moc
         <div>
           <h3 style={{ margin: 0 }}>Nearby</h3>
           <p className="page-subtitle" style={{ margin: 0 }}>
-            Grouped by region; sorted by shared interests (mock liveness).
+            Grouped by region; sorted by shared interests.
           </p>
         </div>
         <Button

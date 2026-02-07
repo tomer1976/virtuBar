@@ -1,15 +1,13 @@
 import {
   AvatarTransformBroadcastPayload,
-  CHAT_MAX_LENGTH,
   ChatBroadcastPayload,
-  DESKTOP_TRANSFORM_RATE_LIMIT,
-  MOBILE_TRANSFORM_RATE_LIMIT,
+  RealtimeEnvelope,
   REALTIME_ANIMATIONS,
   REALTIME_CLIENT_EVENT_NAMES,
   REALTIME_SERVER_EVENT_NAMES,
   REALTIME_VERSION,
-  RealtimeEnvelope,
 } from '../net/realtime/types';
+import { CHAT_MAX_LENGTH, DESKTOP_TRANSFORM_RATE_LIMIT, MOBILE_TRANSFORM_RATE_LIMIT } from '../net/realtime/constants';
 
 describe('realtime types', () => {
   it('aligns client and server event names with the protocol spec', () => {

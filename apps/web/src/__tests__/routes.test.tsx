@@ -5,6 +5,8 @@ import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
 import { ProfileProvider } from '../app/providers/ProfileProvider';
 import { SettingsProvider } from '../app/providers/SettingsProvider';
 import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
+import { RealtimeClientProvider } from '../app/providers/RealtimeClientProvider';
+import { RealtimeIdentityProvider } from '../app/providers/RealtimeIdentityProvider';
 import { AppRoutes, routePaths } from '../routes';
 
 function renderWithRouter(path: string) {
@@ -15,7 +17,11 @@ function renderWithRouter(path: string) {
           <SettingsProvider>
             <AuthProvider>
               <ProfileProvider>
-                <AppRoutes />
+                <RealtimeClientProvider>
+                  <RealtimeIdentityProvider>
+                    <AppRoutes />
+                  </RealtimeIdentityProvider>
+                </RealtimeClientProvider>
               </ProfileProvider>
             </AuthProvider>
           </SettingsProvider>

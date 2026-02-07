@@ -1,11 +1,6 @@
 import { vi } from 'vitest';
-import {
-  CHAT_MAX_LENGTH,
-  DESKTOP_TRANSFORM_RATE_LIMIT,
-  MOBILE_TRANSFORM_RATE_LIMIT,
-  RealtimeEnvelope,
-  RealtimeServerPayloadMap,
-} from '../net/realtime/types';
+import { RealtimeEnvelope, RealtimeServerPayloadMap } from '../net/realtime/types';
+import { CHAT_MAX_LENGTH, DESKTOP_TRANSFORM_RATE_LIMIT, MOBILE_TRANSFORM_RATE_LIMIT } from '../net/realtime/constants';
 import { __resetSimStateForTests, createSimProvider } from '../net/realtime/simProvider';
 
 function collectEvents<T extends keyof RealtimeServerPayloadMap>(eventName: T) {

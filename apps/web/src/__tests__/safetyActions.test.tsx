@@ -3,7 +3,7 @@ import NearbyPanel from '../ui/components/NearbyPanel';
 
 describe('Safety actions in nearby panel', () => {
   it('mutes a user and shows badge', () => {
-    render(<NearbyPanel seed="safety-mute" tickMs={10_000} count={3} />);
+    render(<NearbyPanel seed="safety-mute" count={3} />);
 
     const firstCard = screen.getByTestId('nearby-0');
     fireEvent.click(firstCard);
@@ -16,7 +16,7 @@ describe('Safety actions in nearby panel', () => {
   });
 
   it('blocks a user and removes from list', () => {
-    render(<NearbyPanel seed="safety-block" tickMs={10_000} count={3} />);
+    render(<NearbyPanel seed="safety-block" count={3} />);
 
     const initialCards = screen.getAllByTestId(/nearby-/);
     const firstCard = initialCards[0];
@@ -30,7 +30,7 @@ describe('Safety actions in nearby panel', () => {
   });
 
   it('reports a user, shows badge, and keeps state when reopening overlay', () => {
-    render(<NearbyPanel seed="safety-report" tickMs={10_000} count={3} />);
+    render(<NearbyPanel seed="safety-report" count={3} />);
 
     const firstCard = screen.getByTestId('nearby-0');
     fireEvent.click(firstCard);

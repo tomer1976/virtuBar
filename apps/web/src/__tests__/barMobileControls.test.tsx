@@ -5,6 +5,8 @@ import type { MutableRefObject } from 'react';
 import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
 import { ProfileProvider } from '../app/providers/ProfileProvider';
+import { RealtimeClientProvider } from '../app/providers/RealtimeClientProvider';
+import { RealtimeIdentityProvider } from '../app/providers/RealtimeIdentityProvider';
 import { SettingsProvider } from '../app/providers/SettingsProvider';
 import BarPage from '../pages/BarPage';
 
@@ -38,11 +40,15 @@ describe('BarPage mobile controls', () => {
         <FeatureFlagsProvider>
           <SettingsProvider>
             <ProfileProvider>
-              <MemoryRouter initialEntries={[{ pathname: '/bar/room-1' }]}>
-                <Routes>
-                  <Route path="/bar/:roomId" element={<BarPage />} />
-                </Routes>
-              </MemoryRouter>
+              <RealtimeClientProvider>
+                <RealtimeIdentityProvider>
+                  <MemoryRouter initialEntries={[{ pathname: '/bar/room-1' }]}>
+                    <Routes>
+                      <Route path="/bar/:roomId" element={<BarPage />} />
+                    </Routes>
+                  </MemoryRouter>
+                </RealtimeIdentityProvider>
+              </RealtimeClientProvider>
             </ProfileProvider>
           </SettingsProvider>
         </FeatureFlagsProvider>

@@ -3,7 +3,7 @@ import NearbyPanel from '../ui/components/NearbyPanel';
 
 describe('Profile overlay from nearby list', () => {
   it('opens overlay and shows shared interests', () => {
-    render(<NearbyPanel seed="profile-overlay" tickMs={10_000} count={3} />);
+    render(<NearbyPanel seed="profile-overlay" count={3} />);
 
     const firstCard = screen.getByTestId('nearby-0');
     fireEvent.click(firstCard);

@@ -1,34 +1,29 @@
-export const REALTIME_VERSION = 1 as const;
+import {
+  CHAT_MAX_LENGTH,
+  DESKTOP_TRANSFORM_RATE_LIMIT,
+  MOBILE_TRANSFORM_RATE_LIMIT,
+  REALTIME_ANIMATIONS,
+  REALTIME_CLIENT_EVENT_NAMES,
+  REALTIME_SERVER_EVENT_NAMES,
+  REALTIME_VERSION,
+} from './constants';
 
-export const REALTIME_ANIMATIONS = ['idle', 'walk', 'dance', 'wave'] as const;
 export type RealtimeAnimation = (typeof REALTIME_ANIMATIONS)[number];
-
-export const REALTIME_CLIENT_EVENT_NAMES = [
-  'join_room',
-  'heartbeat',
-  'avatar_transform',
-  'local_chat',
-  'emote',
-] as const;
 export type RealtimeClientEventName = (typeof REALTIME_CLIENT_EVENT_NAMES)[number];
-
-export const REALTIME_SERVER_EVENT_NAMES = [
-  'room_state',
-  'member_joined',
-  'member_left',
-  'avatar_transform_broadcast',
-  'chat_broadcast',
-  'moderation_action',
-  'auth_error',
-] as const;
 export type RealtimeServerEventName = (typeof REALTIME_SERVER_EVENT_NAMES)[number];
 
 export type DeviceType = 'desktop' | 'mobile' | 'vr';
 export type EmoteId = 'cheers' | 'laugh' | 'wave' | string;
 
-export const DESKTOP_TRANSFORM_RATE_LIMIT = 20;
-export const MOBILE_TRANSFORM_RATE_LIMIT = 15;
-export const CHAT_MAX_LENGTH = 240;
+export {
+  REALTIME_VERSION,
+  REALTIME_ANIMATIONS,
+  REALTIME_CLIENT_EVENT_NAMES,
+  REALTIME_SERVER_EVENT_NAMES,
+  DESKTOP_TRANSFORM_RATE_LIMIT,
+  MOBILE_TRANSFORM_RATE_LIMIT,
+  CHAT_MAX_LENGTH,
+};
 
 export interface RealtimeUserIdentity {
   userId: string;

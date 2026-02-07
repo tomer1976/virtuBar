@@ -1,24 +1,14 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
-import { vi } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import NearbyPanel from '../ui/components/NearbyPanel';
 import { generateNearbyUsers, sortNearby } from '../state/mockNearby';
-
-vi.useFakeTimers();
+import { RoomMemberState } from '../net/realtime/types';
 
 describe('NearbyPanel', () => {
-  afterEach(() => {
-    vi.clearAllTimers();
-  });
-
-  afterAll(() => {
-    vi.useRealTimers();
-  });
-
   it('groups by region and keeps rank order from sortNearby', () => {
     const seed = 'nearby-seed';
     const expected = sortNearby(generateNearbyUsers({ seed }));
 
-    render(<NearbyPanel seed={seed} tickMs={10} />);
+    render(<NearbyPanel seed={seed} />);
     const list = screen.getByLabelText(/Nearby list/i);
     const items = within(list).getAllByTestId(/nearby-/);
 
@@ -29,37 +19,44 @@ describe('NearbyPanel', () => {
     });
   });
 
-  it('updates activity over time with drift', () => {
-    render(<NearbyPanel seed="nearby-seed" tickMs={20} />);
+  it('renders realtime members without mock drift and tags self user', () => {
+    const realtimeMembers: RoomMemberState[] = [
+      {
+        userId: 'alice',
+        displayName: 'Alice',
+        avatarId: 'a',
+        x: 0,
+        y: 0.3,
+        z: 0,
+        rotY: 0,
+        anim: 'idle',
+        speaking: false,
+      },
+      {
+        userId: 'bob',
+        displayName: 'Bob',
+        avatarId: 'b',
+        x: 1,
+        y: 0.3,
+        z: 1,
+        rotY: 0,
+        anim: 'walk',
+        speaking: true,
+      },
+    ];
+
+    render(<NearbyPanel realtimeMembers={realtimeMembers} selfUserId="bob" />);
+
     const list = screen.getByLabelText(/Nearby list/i);
-    const firstItem = within(list).getByTestId('nearby-0');
-    const initialActivity = within(firstItem)
-      .getByLabelText(/Activity score/)
-      .textContent;
-
-    act(() => {
-      vi.advanceTimersByTime(25);
-    });
-
-    const updatedItem = within(list).getByTestId('nearby-0');
-    const updatedActivity = within(updatedItem)
-      .getByLabelText(/Activity score/)
-      .textContent;
-
-    expect(updatedActivity).not.toBe(initialActivity);
+    const items = within(list).getAllByTestId(/nearby-/);
+    expect(items).toHaveLength(2);
+    expect(within(items[0]).getByText('Alice')).toBeInTheDocument();
+    expect(within(items[1]).getByText('Bob')).toBeInTheDocument();
+    expect(within(items[1]).getByText(/You/)).toBeInTheDocument();
   });
 
-  it('keeps profile overlay accessible after list updates', () => {
-    render(<NearbyPanel seed="nearby-profile" tickMs={20} count={4} />);
-
-    const firstBefore = screen.getByTestId('nearby-0').textContent;
-
-    act(() => {
-      vi.advanceTimersByTime(40);
-    });
-
-    const firstAfter = screen.getByTestId('nearby-0').textContent;
-    expect(firstAfter).not.toBe(firstBefore);
+  it('opens and closes profile overlay for a nearby user', () => {
+    render(<NearbyPanel seed="nearby-profile" count={4} />);
 
     fireEvent.click(screen.getByTestId('nearby-1'));
     expect(screen.getByRole('dialog', { name: /Profile/i })).toBeInTheDocument();

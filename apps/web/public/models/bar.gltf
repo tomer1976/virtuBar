@@ -1,0 +1,908 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "ChatGPT Low-Poly Bar Venue"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "BarVenue_Root",
+      "children": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36
+      ]
+    },
+    {
+      "name": "Floor",
+      "mesh": 0,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        12.0,
+        1,
+        8.0
+      ]
+    },
+    {
+      "name": "Ceiling",
+      "mesh": 1,
+      "translation": [
+        0,
+        3.0,
+        0
+      ],
+      "scale": [
+        12.0,
+        1,
+        8.0
+      ]
+    },
+    {
+      "name": "Wall_Back",
+      "mesh": 2,
+      "translation": [
+        0,
+        1.5,
+        4.0
+      ],
+      "scale": [
+        12.0,
+        3.0,
+        0.2
+      ]
+    },
+    {
+      "name": "Wall_Left",
+      "mesh": 2,
+      "translation": [
+        -6.0,
+        1.5,
+        0
+      ],
+      "scale": [
+        0.2,
+        3.0,
+        8.0
+      ]
+    },
+    {
+      "name": "Wall_Right",
+      "mesh": 2,
+      "translation": [
+        6.0,
+        1.5,
+        0
+      ],
+      "scale": [
+        0.2,
+        3.0,
+        8.0
+      ]
+    },
+    {
+      "name": "Wall_Front_Left",
+      "mesh": 2,
+      "translation": [
+        -3.3000000000000003,
+        1.5,
+        -4.0
+      ],
+      "scale": [
+        5.4,
+        3.0,
+        0.2
+      ]
+    },
+    {
+      "name": "Wall_Front_Right",
+      "mesh": 2,
+      "translation": [
+        3.3000000000000003,
+        1.5,
+        -4.0
+      ],
+      "scale": [
+        5.4,
+        3.0,
+        0.2
+      ]
+    },
+    {
+      "name": "Wall_Front_Lintel",
+      "mesh": 2,
+      "translation": [
+        0,
+        2.6,
+        -4.0
+      ],
+      "scale": [
+        1.2,
+        0.7999999999999998,
+        0.2
+      ]
+    },
+    {
+      "name": "Door",
+      "mesh": 6,
+      "translation": [
+        0,
+        1.1,
+        -3.9499999999999997
+      ],
+      "scale": [
+        1.2,
+        2.2,
+        0.05
+      ]
+    },
+    {
+      "name": "BarCounter",
+      "mesh": 3,
+      "translation": [
+        4.5,
+        0.55,
+        0.5
+      ],
+      "scale": [
+        1.0,
+        1.1,
+        6.0
+      ]
+    },
+    {
+      "name": "BackBar_Shelf",
+      "mesh": 3,
+      "translation": [
+        5.4,
+        1.0,
+        0.5
+      ],
+      "scale": [
+        0.4,
+        2.0,
+        5.4
+      ]
+    },
+    {
+      "name": "Table_1",
+      "mesh": 4,
+      "translation": [
+        -3,
+        0.375,
+        -1.5
+      ],
+      "scale": [
+        1.0,
+        0.75,
+        1.0
+      ]
+    },
+    {
+      "name": "Table_2",
+      "mesh": 4,
+      "translation": [
+        -3,
+        0.375,
+        2.0
+      ],
+      "scale": [
+        1.0,
+        0.75,
+        1.0
+      ]
+    },
+    {
+      "name": "Table_3",
+      "mesh": 4,
+      "translation": [
+        0.5,
+        0.375,
+        -2.0
+      ],
+      "scale": [
+        1.0,
+        0.75,
+        1.0
+      ]
+    },
+    {
+      "name": "Table_4",
+      "mesh": 4,
+      "translation": [
+        0.5,
+        0.375,
+        1.8
+      ],
+      "scale": [
+        1.0,
+        0.75,
+        1.0
+      ]
+    },
+    {
+      "name": "Chair_1",
+      "mesh": 5,
+      "translation": [
+        -2.1,
+        0.45,
+        -1.5
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_2",
+      "mesh": 5,
+      "translation": [
+        -3.9,
+        0.45,
+        -1.5
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_3",
+      "mesh": 5,
+      "translation": [
+        -3,
+        0.45,
+        -0.6
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_4",
+      "mesh": 5,
+      "translation": [
+        -3,
+        0.45,
+        -2.4
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_5",
+      "mesh": 5,
+      "translation": [
+        -2.1,
+        0.45,
+        2.0
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_6",
+      "mesh": 5,
+      "translation": [
+        -3.9,
+        0.45,
+        2.0
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_7",
+      "mesh": 5,
+      "translation": [
+        -3,
+        0.45,
+        2.9
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_8",
+      "mesh": 5,
+      "translation": [
+        -3,
+        0.45,
+        1.1
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_9",
+      "mesh": 5,
+      "translation": [
+        1.4,
+        0.45,
+        -2.0
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_10",
+      "mesh": 5,
+      "translation": [
+        -0.4,
+        0.45,
+        -2.0
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_11",
+      "mesh": 5,
+      "translation": [
+        0.5,
+        0.45,
+        -1.1
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_12",
+      "mesh": 5,
+      "translation": [
+        0.5,
+        0.45,
+        -2.9
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_13",
+      "mesh": 5,
+      "translation": [
+        1.4,
+        0.45,
+        1.8
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_14",
+      "mesh": 5,
+      "translation": [
+        -0.4,
+        0.45,
+        1.8
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_15",
+      "mesh": 5,
+      "translation": [
+        0.5,
+        0.45,
+        2.7
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Chair_16",
+      "mesh": 5,
+      "translation": [
+        0.5,
+        0.45,
+        0.9
+      ],
+      "scale": [
+        0.45,
+        0.9,
+        0.45
+      ]
+    },
+    {
+      "name": "Stool_1",
+      "mesh": 5,
+      "translation": [
+        3.6,
+        0.375,
+        -1.5
+      ],
+      "scale": [
+        0.4,
+        0.75,
+        0.4
+      ]
+    },
+    {
+      "name": "Stool_2",
+      "mesh": 5,
+      "translation": [
+        3.6,
+        0.375,
+        -0.30000000000000004
+      ],
+      "scale": [
+        0.4,
+        0.75,
+        0.4
+      ]
+    },
+    {
+      "name": "Stool_3",
+      "mesh": 5,
+      "translation": [
+        3.6,
+        0.375,
+        0.8999999999999999
+      ],
+      "scale": [
+        0.4,
+        0.75,
+        0.4
+      ]
+    },
+    {
+      "name": "Light_1",
+      "mesh": 7,
+      "translation": [
+        -2.5,
+        2.7,
+        0.0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    {
+      "name": "Light_2",
+      "mesh": 7,
+      "translation": [
+        1.5,
+        2.7,
+        0.0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Plane_Floor",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0
+        }
+      ]
+    },
+    {
+      "name": "Plane_Ceiling",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 6
+        }
+      ]
+    },
+    {
+      "name": "Cube_Walls",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 3,
+            "NORMAL": 4
+          },
+          "indices": 5,
+          "material": 1
+        }
+      ]
+    },
+    {
+      "name": "Cube_Bar",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 3,
+            "NORMAL": 4
+          },
+          "indices": 5,
+          "material": 2
+        }
+      ]
+    },
+    {
+      "name": "Cube_Table",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 3,
+            "NORMAL": 4
+          },
+          "indices": 5,
+          "material": 3
+        }
+      ]
+    },
+    {
+      "name": "Cube_Chair",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 3,
+            "NORMAL": 4
+          },
+          "indices": 5,
+          "material": 4
+        }
+      ]
+    },
+    {
+      "name": "Cube_Door",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 3,
+            "NORMAL": 4
+          },
+          "indices": 5,
+          "material": 5
+        }
+      ]
+    },
+    {
+      "name": "Cube_Light",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 3,
+            "NORMAL": 4
+          },
+          "indices": 5,
+          "material": 7
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "Floor_WoodDark",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.2,
+          0.12,
+          0.07,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.85
+      }
+    },
+    {
+      "name": "Walls_Light",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.85,
+          0.85,
+          0.88,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.95
+      }
+    },
+    {
+      "name": "Bar_Dark",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.1,
+          0.1,
+          0.12,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.7
+      }
+    },
+    {
+      "name": "Tables",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.35,
+          0.22,
+          0.12,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.8
+      }
+    },
+    {
+      "name": "Chairs",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.18,
+          0.18,
+          0.2,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.85
+      }
+    },
+    {
+      "name": "Door",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.3,
+          0.18,
+          0.08,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.75
+      }
+    },
+    {
+      "name": "Ceiling",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.92,
+          0.92,
+          0.94,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.98
+      }
+    },
+    {
+      "name": "LightFixture",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          1.0,
+          0.95,
+          0.8,
+          1.0
+        ],
+        "metallicFactor": 0.0,
+        "roughnessFactor": 0.4
+      }
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 756,
+      "uri": "bar_venue_lowpoly.bin"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 48,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 96,
+      "byteLength": 12,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 108,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 396,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 684,
+      "byteLength": 72,
+      "target": 34963
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "min": [
+        -0.5,
+        0.0,
+        -0.5
+      ],
+      "max": [
+        0.5,
+        0.0,
+        0.5
+      ]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 4,
+      "type": "VEC3",
+      "min": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "max": [
+        0.0,
+        1.0,
+        0.0
+      ]
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5123,
+      "count": 6,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        3
+      ]
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -0.5,
+        -0.5,
+        -0.5
+      ],
+      "max": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5126,
+      "count": 24,
+      "type": "VEC3",
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "bufferView": 5,
+      "componentType": 5123,
+      "count": 36,
+      "type": "SCALAR",
+      "min": [
+        0
+      ],
+      "max": [
+        23
+      ]
+    }
+  ]
+}
+

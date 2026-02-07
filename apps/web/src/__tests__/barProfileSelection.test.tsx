@@ -4,6 +4,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
 import { SettingsProvider } from '../app/providers/SettingsProvider';
+import { RealtimeClientProvider } from '../app/providers/RealtimeClientProvider';
+import { RealtimeIdentityProvider } from '../app/providers/RealtimeIdentityProvider';
+import { AuthProvider } from '../app/providers/AuthProvider';
 import { generateNearbyUsers } from '../state/mockNearby';
 import BarPage from '../pages/BarPage';
 
@@ -42,17 +45,23 @@ describe('BarPage profile selection', () => {
 
   const renderBar = () =>
     render(
-      <ErrorNotificationsProvider>
-        <FeatureFlagsProvider>
-          <SettingsProvider>
-            <MemoryRouter initialEntries={[{ pathname: '/bar/room-1' }]}>
-              <Routes>
-                <Route path="/bar/:roomId" element={<BarPage />} />
-              </Routes>
-            </MemoryRouter>
-          </SettingsProvider>
-        </FeatureFlagsProvider>
-      </ErrorNotificationsProvider>,
+      <MemoryRouter initialEntries={[{ pathname: '/bar/room-1' }]}>
+        <ErrorNotificationsProvider>
+          <FeatureFlagsProvider>
+            <SettingsProvider>
+              <AuthProvider>
+                <RealtimeClientProvider>
+                  <RealtimeIdentityProvider>
+                    <Routes>
+                      <Route path="/bar/:roomId" element={<BarPage />} />
+                    </Routes>
+                  </RealtimeIdentityProvider>
+                </RealtimeClientProvider>
+              </AuthProvider>
+            </SettingsProvider>
+          </FeatureFlagsProvider>
+        </ErrorNotificationsProvider>
+      </MemoryRouter>,
     );
 
   it('opens overlay for NPC and player selections', async () => {

@@ -4,6 +4,8 @@ export type NpcState = {
   id: number;
   position: THREE.Vector3;
   target: THREE.Vector3;
+  minRadius: number;
+  maxRadius: number;
   speed: number;
   state: 'idle' | 'walk';
   timer: number;
@@ -21,8 +23,9 @@ export type NpcSimConfig = {
   maxSpeed?: number;
 };
 
-const DEFAULT_MIN_RADIUS = 1.6;
-const DEFAULT_MAX_RADIUS = 5.4;
+// Keep NPCs clustered near the interior; tuned for current venue scale.
+const DEFAULT_MIN_RADIUS = 1.0;
+const DEFAULT_MAX_RADIUS = 2.2;
 const DEFAULT_MIN_SPEED = 0.7;
 const DEFAULT_MAX_SPEED = 1.25;
 
@@ -67,6 +70,8 @@ export function createNpcStates(config: NpcSimConfig, rngOverride?: () => number
       id: i,
       position,
       target,
+      minRadius,
+      maxRadius,
       speed,
       color,
       heading,
@@ -79,7 +84,12 @@ export function createNpcStates(config: NpcSimConfig, rngOverride?: () => number
   return states;
 }
 
-export function chooseNewTarget(state: NpcState, rng: () => number, minRadius = DEFAULT_MIN_RADIUS, maxRadius = DEFAULT_MAX_RADIUS) {
+export function chooseNewTarget(
+  state: NpcState,
+  rng: () => number,
+  minRadius = state.minRadius ?? DEFAULT_MIN_RADIUS,
+  maxRadius = state.maxRadius ?? DEFAULT_MAX_RADIUS,
+) {
   const radius = minRadius + (maxRadius - minRadius) * rng();
   const angle = rng() * Math.PI * 2;
   state.target.set(Math.cos(angle) * radius, state.position.y, Math.sin(angle) * radius);
@@ -89,7 +99,7 @@ export function stepNpc(state: NpcState, dt: number, rng: () => number) {
   if (state.state === 'idle') {
     state.timer -= dt;
     if (state.timer <= 0) {
-      chooseNewTarget(state, rng);
+      chooseNewTarget(state, rng, state.minRadius, state.maxRadius);
       state.state = 'walk';
     }
     return;
