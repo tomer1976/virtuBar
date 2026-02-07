@@ -50,4 +50,27 @@ describe('SettingsPanel', () => {
     expect((screen.getByLabelText(/Show joystick overlay/i) as HTMLInputElement).checked).toBe(nextJoystick);
     expect(screen.getByLabelText(/Invert Y axis/i)).toBeChecked();
   });
+
+  it('persists audio, motion, and graphics settings across reload', () => {
+    const { unmount } = renderPanel();
+
+    const mute = screen.getByLabelText(/Mute audio/i) as HTMLInputElement;
+    const motion = screen.getByLabelText(/Reduce motion/i) as HTMLInputElement;
+    const low = screen.getByLabelText(/Low/i) as HTMLInputElement;
+
+    fireEvent.click(mute);
+    fireEvent.click(motion);
+    fireEvent.click(low);
+
+    expect(mute).toBeChecked();
+    expect(motion).toBeChecked();
+    expect(low).toBeChecked();
+
+    unmount();
+
+    renderPanel();
+    expect(screen.getByLabelText(/Mute audio/i)).toBeChecked();
+    expect(screen.getByLabelText(/Reduce motion/i)).toBeChecked();
+    expect(screen.getByLabelText(/Low/i)).toBeChecked();
+  });
 });

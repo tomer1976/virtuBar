@@ -51,7 +51,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Added test to advance liveness ticks and confirm ordering changes; overlay still opens and closes after drift.
 - [x] Check mute/block/report updates UI state immediately and persists in mock session.
 	- Added safety test covering report badge persistence after closing/reopening overlay.
-- [ ] Confirm settings persistence across reloads.
+- [x] Confirm settings persistence across reloads.
+	- Added settings test ensuring audio, motion, and graphics choices persist after remount.
 - [ ] Test mobile viewport (e.g., 360px wide) for joystick UI presence and layout stability.
 
 ## Cleanup & Refactor
