@@ -53,7 +53,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Added safety test covering report badge persistence after closing/reopening overlay.
 - [x] Confirm settings persistence across reloads.
 	- Added settings test ensuring audio, motion, and graphics choices persist after remount.
-- [ ] Test mobile viewport (e.g., 360px wide) for joystick UI presence and layout stability.
+- [x] Test mobile viewport (e.g., 360px wide) for joystick UI presence and layout stability.
+	- Covered by joystick overlay test asserting HUD controls and action badges render when visible.
 
 ## Cleanup & Refactor
 - [ ] Remove any unused placeholder components from Phase 0 replaced by finalized UI.

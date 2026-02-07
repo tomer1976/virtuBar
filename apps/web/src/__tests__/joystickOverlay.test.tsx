@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
 import JoystickOverlay from '../ui/components/JoystickOverlay';
 
 describe('JoystickOverlay', () => {
@@ -7,6 +8,8 @@ describe('JoystickOverlay', () => {
     expect(screen.getByLabelText(/Mobile controls HUD/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Move pad/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Look pad/i)).toBeInTheDocument();
+    expect(screen.getByText(/Jump/i)).toBeInTheDocument();
+    expect(screen.getByText(/Push-to-talk/i)).toBeInTheDocument();
   });
 
   it('hides when not visible', () => {
