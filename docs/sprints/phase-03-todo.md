@@ -57,6 +57,8 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 - [x] Manually exceed transform rate to confirm rate limiting behavior without crashes.
 	- Automated coverage: over-limit burst test ensures mobile rate caps clamp without errors (realtimeSim.test.ts).
 - [ ] Test reconnect: force disconnect and reconnect, ensuring room state rehydrates.
+- [x] Test reconnect: force disconnect and reconnect, ensuring room state rehydrates.
+	- Covered via reconnect simulation test ensuring room_state replay and resumed chat (realtimeSim.test.ts).
 - [ ] Verify smoothing produces stable, non-jittery motion at normal update rates.
 
 ## Cleanup & Refactor
