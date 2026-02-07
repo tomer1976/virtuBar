@@ -52,7 +52,6 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 	- Protocol-aligned types centralized in apps/web/src/net/realtime/types for now; ready to hoist to shared when backend arrives.
 
 ## Validation & Testing
-- [ ] Open two browser tabs with different mock identities; join same room and verify mutual movement and chat visibility.
 - [x] Open two browser tabs with different mock identities; join same room and verify mutual movement and chat visibility.
 	- Covered via automated sim test: dual clients exchange transforms and chat (realtimeSim.test.ts).
 - [ ] Manually exceed transform rate to confirm rate limiting behavior without crashes.
