@@ -1,4 +1,4 @@
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { vi } from 'vitest';
 import NearbyPanel from '../ui/components/NearbyPanel';
 import { generateNearbyUsers, sortNearby } from '../state/mockNearby';
@@ -47,5 +47,24 @@ describe('NearbyPanel', () => {
       .textContent;
 
     expect(updatedActivity).not.toBe(initialActivity);
+  });
+
+  it('keeps profile overlay accessible after list updates', () => {
+    render(<NearbyPanel seed="nearby-profile" tickMs={20} count={4} />);
+
+    const firstBefore = screen.getByTestId('nearby-0').textContent;
+
+    act(() => {
+      vi.advanceTimersByTime(40);
+    });
+
+    const firstAfter = screen.getByTestId('nearby-0').textContent;
+    expect(firstAfter).not.toBe(firstBefore);
+
+    fireEvent.click(screen.getByTestId('nearby-1'));
+    expect(screen.getByRole('dialog', { name: /Profile/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Close/i }));
+    expect(screen.queryByRole('dialog', { name: /Profile/i })).not.toBeInTheDocument();
   });
 });
