@@ -45,7 +45,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 ## Validation & Testing
 - [x] Manually run dev app and execute: Onboarding → Rooms → Join hottest → HUD interactions → safety actions → chat interactions.
 	- Covered via integration test simulating onboarding through bar entry, chat send, and nearby safety report badge.
-- [ ] Validate minimum tag selection enforcement and error messaging.
+- [x] Validate minimum tag selection enforcement and error messaging.
+	- Covered by onboarding test ensuring messaging updates and continue is disabled until 5 tags are selected.
 - [ ] Verify nearby list updates over time and profile card opens reliably from list and avatar interactions.
 - [ ] Check mute/block/report updates UI state immediately and persists in mock session.
 - [ ] Confirm settings persistence across reloads.

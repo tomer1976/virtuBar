@@ -68,4 +68,32 @@ describe('OnboardingPage', () => {
     expect(parsed.audioPermission).toBe('granted');
     expect(parsed.audioReady).toBe(true);
   });
+
+  it('shows interest minimum messaging until five tags are selected', () => {
+    renderPage();
+
+    fireEvent.change(screen.getByLabelText(/Display name/i), {
+      target: { value: 'Tag Tester' },
+    });
+    fireEvent.click(screen.getByLabelText(/Confirm legal age/i));
+    fireEvent.click(screen.getByRole('button', { name: /Save & Continue/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /aurora/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Continue$/i }));
+
+    const continueInterests = screen.getByRole('button', { name: /^Continue$/i });
+    expect(continueInterests).toBeDisabled();
+    expect(screen.getByText(/5 more tags needed to continue/i)).toBeInTheDocument();
+
+    ['Music', 'Karaoke', 'VR', 'Cocktails'].forEach((interest) => {
+      fireEvent.click(screen.getByRole('button', { name: interest }));
+    });
+
+    expect(screen.getByText(/1 more tag needed/i)).toBeInTheDocument();
+    expect(continueInterests).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Live DJ' }));
+    expect(screen.getByText(/Great, minimum interests selected/i)).toBeInTheDocument();
+    expect(continueInterests).toBeEnabled();
+  });
 });
