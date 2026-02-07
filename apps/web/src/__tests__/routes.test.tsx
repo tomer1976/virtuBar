@@ -3,17 +3,20 @@ import { MemoryRouter } from 'react-router-dom';
 import { AuthProvider } from '../app/providers/AuthProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
 import { ProfileProvider } from '../app/providers/ProfileProvider';
+import { SettingsProvider } from '../app/providers/SettingsProvider';
 import { AppRoutes, routePaths } from '../routes';
 
 function renderWithRouter(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <FeatureFlagsProvider>
-        <AuthProvider>
-          <ProfileProvider>
-            <AppRoutes />
-          </ProfileProvider>
-        </AuthProvider>
+        <SettingsProvider>
+          <AuthProvider>
+            <ProfileProvider>
+              <AppRoutes />
+            </ProfileProvider>
+          </AuthProvider>
+        </SettingsProvider>
       </FeatureFlagsProvider>
     </MemoryRouter>,
   );
