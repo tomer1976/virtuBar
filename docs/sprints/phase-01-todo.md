@@ -8,7 +8,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Done with age gate confirmation, min-5 interest enforcement, and mocked mic permission + audio readiness persisted to profile storage.
 - [x] Build room list UI with theme filters, occupancy display, and “Join hottest room” CTA; wire to mock rooms dataset.
 	- Added filterable mock room dataset with occupancy badges and CTA targeting hottest room in current view.
-- [ ] Implement mock data engine to generate 5–15 rooms and 20–60 fake users with seeded randomness for repeatable demos.
+- [x] Implement mock data engine to generate 5–15 rooms and 20–60 fake users with seeded randomness for repeatable demos.
+	- Added seeded generator producing deterministic rooms/users with balanced occupancy and shared default seed for repeatable demos.
 - [ ] Add simulated occupancy drift over time for rooms; ensure UI updates without page reload.
 - [ ] Implement nearby users panel with distance-sorted list fed by simulated movement/proximity updates.
 - [ ] Add mock local chat panel that supports sending messages, shows timestamps, and periodically injects simulated incoming messages.

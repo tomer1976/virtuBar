@@ -1,20 +1,21 @@
 import { useMemo, useState } from 'react';
+import { DEFAULT_MOCK_SEED, generateMockData } from '../state/mockDataEngine';
 import {
   filterRoomsByTheme,
   getHottestRoom,
   mockRoomFilters,
-  mockRooms,
   RoomFilter,
 } from '../state/mockRooms';
 import { Button } from '../ui/components';
 
 function RoomsPage() {
+  const { rooms } = useMemo(() => generateMockData({ seed: DEFAULT_MOCK_SEED }), []);
   const [filter, setFilter] = useState<RoomFilter>('all');
 
-  const filteredRooms = useMemo(() => filterRoomsByTheme(mockRooms, filter), [filter]);
+  const filteredRooms = useMemo(() => filterRoomsByTheme(rooms, filter), [filter, rooms]);
   const hottestRoom = useMemo(
-    () => getHottestRoom(filteredRooms.length ? filteredRooms : mockRooms),
-    [filteredRooms],
+    () => getHottestRoom(filteredRooms.length ? filteredRooms : rooms),
+    [filteredRooms, rooms],
   );
 
   const filterLabel = mockRoomFilters.find((option) => option.value === filter)?.label ?? 'All themes';
