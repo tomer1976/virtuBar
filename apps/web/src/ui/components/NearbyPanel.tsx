@@ -1,16 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, ProfileCardOverlay } from '.';
 import { driftNearbyUsers, generateNearbyUsers, NearbyOptions, sortNearby } from '../../state/mockNearby';
+import { RoomMemberState } from '../../net/realtime/types';
 import { createSeededRng } from '../../state/mockDataEngine';
 import { mockEngineConfig } from '../../state/mockConfig';
 import { useFeatureFlags } from '../../app/providers/FeatureFlagsProvider';
 
 type NearbyPanelProps = NearbyOptions & {
   tickMs?: number;
+  realtimeMembers?: RoomMemberState[];
+  selfUserId?: string;
 };
 
-function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = mockEngineConfig.nearby.tickMs }: NearbyPanelProps) {
+function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = mockEngineConfig.nearby.tickMs, realtimeMembers, selfUserId }: NearbyPanelProps) {
   const resolvedSeed = seed ?? mockEngineConfig.seed;
+  const isRealtime = Boolean(realtimeMembers);
+
   const initial = useMemo(
     () => sortNearby(generateNearbyUsers({ seed: resolvedSeed, count })),
     [resolvedSeed, count],
@@ -24,24 +29,36 @@ function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = moc
   const flags = useFeatureFlags();
 
   useEffect(() => {
+    if (isRealtime && realtimeMembers) {
+      const mapped = realtimeMembers.map((member) => ({
+        id: member.userId,
+        displayName: member.displayName,
+        avatarPreset: member.avatarId,
+        sharedInterests: [],
+        region: 'Room',
+        affinityScore: 100,
+      }));
+      setNearby(sortNearby(mapped));
+      return;
+    }
     setNearby(initial);
     setSelectedId(null);
     setMutedIds(new Set());
     setBlockedIds(new Set());
     setReportedIds(new Set());
-  }, [initial]);
+  }, [initial, isRealtime, realtimeMembers]);
 
   useEffect(() => {
     rngRef.current = createSeededRng(`${resolvedSeed}-nearby-drift`);
   }, [resolvedSeed]);
 
   useEffect(() => {
-    if (!flags.USE_MOCK_LIVENESS) return undefined;
+    if (isRealtime || !flags.USE_MOCK_LIVENESS) return undefined;
     const id = window.setInterval(() => {
       setNearby((prev) => sortNearby(driftNearbyUsers(prev, rngRef.current ?? (() => Math.random()))));
     }, tickMs);
     return () => window.clearInterval(id);
-  }, [tickMs, flags.USE_MOCK_LIVENESS]);
+  }, [tickMs, flags.USE_MOCK_LIVENESS, isRealtime]);
 
   const displayedNearby = useMemo(
     () => nearby.filter((user) => !blockedIds.has(user.id)),
@@ -114,15 +131,18 @@ function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = moc
               {user.sharedInterests.join(', ') || 'No shared interests yet'}
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span aria-label={`Shared interests with ${user.displayName}`}>
-                {user.sharedInterests.length} shared interests
-              </span>
+              {user.sharedInterests.length ? (
+                <span aria-label={`Shared interests with ${user.displayName}`}>
+                  {user.sharedInterests.length} shared interests
+                </span>
+              ) : null}
               <span className="badge" aria-label={`Activity score for ${user.displayName}`}>
                 Activity {user.affinityScore}
               </span>
               <span className="badge" aria-label="Rank">
                 #{idx + 1}
               </span>
+              {selfUserId === user.id ? <span className="badge">You</span> : null}
               {mutedIds.has(user.id) ? <span className="badge">Muted</span> : null}
               {reportedIds.has(user.id) ? <span className="badge">Reported</span> : null}
             </div>

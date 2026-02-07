@@ -6,16 +6,21 @@ type JoystickOverlayProps = {
   onMove?: (vector: { x: number; z: number }) => void;
   onMoveEnd?: () => void;
   onLookDelta?: (delta: { dx: number; dy: number }) => void;
+  variant?: 'full' | 'compact';
 };
 
-function JoystickOverlay({ visible, invertYAxis = false, onMove, onMoveEnd, onLookDelta }: JoystickOverlayProps) {
+function JoystickOverlay({ visible, invertYAxis = false, onMove, onMoveEnd, onLookDelta, variant = 'full' }: JoystickOverlayProps) {
   const movePadRef = useRef<HTMLDivElement | null>(null);
   const lookPadRef = useRef<HTMLDivElement | null>(null);
   const lookLastRef = useRef<{ x: number; y: number } | null>(null);
   const [moveActive, setMoveActive] = useState(false);
   const [lookActive, setLookActive] = useState(false);
 
-  const padSize = useMemo(() => ({ size: 140, knob: 60 }), []);
+  const padSize = useMemo(() => (
+    variant === 'compact'
+      ? { size: 96, knob: 44 }
+      : { size: 140, knob: 60 }
+  ), [variant]);
 
   if (!visible) return null;
 
@@ -89,32 +94,30 @@ function JoystickOverlay({ visible, invertYAxis = false, onMove, onMoveEnd, onLo
     lookLastRef.current = null;
   };
 
-  return (
-    <div
-      className="panel"
-      aria-label="Mobile controls HUD"
-      style={{ display: 'grid', gap: '12px', position: 'relative' }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h3 style={{ margin: 0 }}>Mobile Controls</h3>
-          <p className="page-subtitle" style={{ margin: 0 }}>
-            Drag to move/look. Action badges are placeholders.
-          </p>
+  const content = (
+    <>
+      {variant === 'full' ? (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h3 style={{ margin: 0 }}>Mobile Controls</h3>
+            <p className="page-subtitle" style={{ margin: 0 }}>
+              Drag to move/look. Action badges are placeholders.
+            </p>
+          </div>
+          {invertYAxis ? <span className="badge">Invert Y</span> : null}
         </div>
-        {invertYAxis ? <span className="badge">Invert Y</span> : null}
-      </div>
+      ) : null}
 
       <div
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gap: '16px',
+          gap: variant === 'compact' ? '8px' : '16px',
           alignItems: 'center',
         }}
       >
         <div style={{ display: 'grid', gap: '8px' }}>
-          <div style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>Move</div>
+          {variant === 'full' ? <div style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>Move</div> : null}
           <div
             ref={movePadRef}
             aria-label="Move pad"
@@ -148,7 +151,7 @@ function JoystickOverlay({ visible, invertYAxis = false, onMove, onMoveEnd, onLo
         </div>
 
         <div style={{ display: 'grid', gap: '8px' }}>
-          <div style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>Look</div>
+          {variant === 'full' ? <div style={{ color: 'var(--color-text-muted)', fontSize: '12px' }}>Look</div> : null}
           <div
             ref={lookPadRef}
             aria-label="Look pad"
@@ -182,12 +185,43 @@ function JoystickOverlay({ visible, invertYAxis = false, onMove, onMoveEnd, onLo
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }} aria-label="Primary actions">
-        <span className="badge">Jump</span>
-        <span className="badge">Interact</span>
-        <span className="badge">Push-to-talk</span>
-        <span className="badge">Menu</span>
+      {variant === 'full' ? (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }} aria-label="Primary actions">
+          <span className="badge">Jump</span>
+          <span className="badge">Interact</span>
+          <span className="badge">Push-to-talk</span>
+          <span className="badge">Menu</span>
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (variant === 'compact') {
+    return (
+      <div
+        aria-label="Mobile controls HUD"
+        style={{
+          display: 'grid',
+          gap: '8px',
+          padding: '8px 10px',
+          borderRadius: '12px',
+          background: 'rgba(15,23,42,0.65)',
+          border: '1px solid rgba(226,232,240,0.25)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+        }}
+      >
+        {content}
       </div>
+    );
+  }
+
+  return (
+    <div
+      className="panel"
+      aria-label="Mobile controls HUD"
+      style={{ display: 'grid', gap: '12px', position: 'relative' }}
+    >
+      {content}
     </div>
   );
 }

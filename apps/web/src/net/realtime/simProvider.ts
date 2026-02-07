@@ -1,5 +1,4 @@
 import {
-  AvatarTransformBroadcastPayload,
   AvatarTransformState,
   CHAT_MAX_LENGTH,
   DESKTOP_TRANSFORM_RATE_LIMIT,
@@ -75,15 +74,25 @@ export class SimRealtimeProvider implements RealtimeProvider {
     if (this.connected) return;
     this.connected = true;
     activeProviders.add(this);
+
+    if (this.currentRoomId && this.userId) {
+      const room = rooms.get(this.currentRoomId);
+      if (room) {
+        this.emitToSelf(
+          buildEnvelope('room_state', {
+            roomId: this.currentRoomId,
+            serverTimeMs: now(),
+            members: Array.from(room.members.values()),
+          }),
+        );
+      }
+    }
   }
 
   async disconnect(): Promise<void> {
-    if (this.currentRoomId && this.userId) {
-      await this.leaveRoom(this.currentRoomId);
-    }
     this.connected = false;
     activeProviders.delete(this);
-    this.handlers.clear();
+    this.transformTimestamps = [];
   }
 
   async joinRoom(payload: JoinRoomPayload): Promise<void> {

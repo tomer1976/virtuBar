@@ -8,15 +8,22 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 	- Added protocol-aligned types, envelopes, limits, and tests under apps/web/src/net/realtime.
 - [x] Implement simulation provider that maintains in-memory room state and emits `room_state`, `member_joined`, `member_left`, `avatar_transform_broadcast`, `chat_broadcast` events.
 	- Added in-memory sim provider with shared room state and tests covering join/member events, transforms, chat limits, and leaves.
-- [ ] Add provider selector flag `REALTIME_PROVIDER=sim|ws` (default sim) with DI wiring in app bootstrapping.
-- [ ] Implement transform smoothing/interpolation buffer (100–200ms) with snap thresholds; integrate with avatar render pipeline.
-- [ ] Enforce client-side rate limits: transforms (20/sec desktop, 15/sec mobile), chat length max per protocol; drop or delay over-limit events with optional debug log.
-- [ ] Support multiple local identities (e.g., per-tab user IDs) to simulate multi-user presence; allow identity override via query param or dev toggle.
-- [ ] Ensure reconnect flow: on simulated disconnect, allow reconnect that replays current room state and resumes event stream.
-- [ ] Wire simulated events into existing HUD (nearby list, chat panel, profile card) without changing UI contracts.
+- [x] Add provider selector flag `REALTIME_PROVIDER=sim|ws` (default sim) with DI wiring in app bootstrapping.
+	- Added env-driven provider resolver with mock override, React context wiring, and default sim fallback.
+- [x] Implement transform smoothing/interpolation buffer (100–200ms) with snap thresholds; integrate with avatar render pipeline.
+	- Added reusable transform smoother with snap thresholds and wired NPC avatars through it to prep realtime rendering.
+- [x] Enforce client-side rate limits: transforms (20/sec desktop, 15/sec mobile), chat length max per protocol; drop or delay over-limit events with optional debug log.
+	- Added client-side rate-limited provider wrapper for transforms and chat with optional debug logging; integrated into provider factory.
+- [x] Support multiple local identities (e.g., per-tab user IDs) to simulate multi-user presence; allow identity override via query param or dev toggle.
+	- Added realtime identity resolver with per-tab session IDs, query-param override hooks, and React provider context.
+- [x] Ensure reconnect flow: on simulated disconnect, allow reconnect that replays current room state and resumes event stream.
+	- Sim provider now replays room_state on reconnect without dropping membership; tests cover state replay and resumed broadcasts.
+- [x] Wire simulated events into existing HUD (nearby list, chat panel, profile card) without changing UI contracts.
+	- Added realtime room context and fed live chat/members into HUD panels while preserving mock-liveness toggle.
 
 ## Backend Tasks (if applicable)
-- [ ] Mark backend as N/A; no network services added this phase.
+- [x] Mark backend as N/A; no network services added this phase.
+	- Backend intentionally deferred; phase remains client-only simulation.
 
 ## Realtime Tasks (if applicable)
 - [ ] Keep provider purely client-side; ensure shapes match `realtime-protocol.md` to enable Phase 7 swap.

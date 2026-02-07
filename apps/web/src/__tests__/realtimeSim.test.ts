@@ -141,4 +141,42 @@ describe('SimRealtimeProvider', () => {
     await providerB.leaveRoom('room-leave');
     expect(leftEvents.events[0]?.payload.userId).toBe('user-b');
   });
+
+  it('replays room state on reconnect and resumes events', async () => {
+    const providerA = createSimProvider();
+    const providerB = createSimProvider();
+
+    await providerA.connect();
+    await providerB.connect();
+
+    const stateEventsA = collectEvents('room_state');
+    const chatEventsA = collectEvents('chat_broadcast');
+    providerA.on(stateEventsA.eventName, stateEventsA.handler);
+    providerA.on(chatEventsA.eventName, chatEventsA.handler);
+
+    await providerA.joinRoom({
+      roomId: 'room-reconnect',
+      user: { userId: 'user-a', displayName: 'A', avatarId: 'ava' },
+      deviceType: 'desktop',
+    });
+    await providerB.joinRoom({
+      roomId: 'room-reconnect',
+      user: { userId: 'user-b', displayName: 'B', avatarId: 'avb' },
+      deviceType: 'desktop',
+    });
+
+    await providerA.disconnect();
+
+    await providerB.sendChat({ roomId: 'room-reconnect', text: 'hi after drop', mode: 'local' });
+
+    await providerA.connect();
+
+    expect(stateEventsA.events.length).toBeGreaterThan(1);
+    const lastState = stateEventsA.events[stateEventsA.events.length - 1]?.payload;
+    expect(lastState?.members.map((m) => m.userId).sort()).toEqual(['user-a', 'user-b']);
+
+    // After reconnect, providerA should get new chat broadcasts
+    await providerB.sendChat({ roomId: 'room-reconnect', text: 'welcome back', mode: 'local' });
+    expect(chatEventsA.events[chatEventsA.events.length - 1]?.payload.text).toBe('welcome back');
+  });
 });

@@ -94,6 +94,7 @@ a {
   box-shadow: var(--shadow-sm);
   padding: var(--space-3);
   min-height: 320px;
+  position: relative;
 }
 
 .scene-root {
@@ -121,6 +122,7 @@ a {
   justify-content: center;
   color: var(--color-text-muted);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0.85));
+  pointer-events: none;
 }
 
 .scene-overlay {
@@ -134,6 +136,7 @@ a {
   border: 1px solid rgba(226, 232, 240, 0.35);
   box-shadow: var(--shadow-sm);
   font-size: 0.95rem;
+  pointer-events: none;
 }
 
 .toast-stack {
@@ -147,10 +150,158 @@ a {
   max-width: min(420px, 90vw);
 }
 
+.btn-compact {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.bar-quick-nav {
+  display: none;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 8px 0 12px;
+}
+
+.bar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.bar-layout-immersive {
+  grid-template-columns: 1fr;
+}
+
+.bar-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bar-stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bar-stage-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.side-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+}
+
+.floating-joystick {
+  display: none;
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.floating-joystick > * {
+  pointer-events: auto;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.scene-chat-overlay {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 12;
+  pointer-events: auto;
+}
+
+.scene-chat-overlay .panel {
+  max-height: 50vh;
+  overflow: auto;
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(226, 232, 240, 0.35);
+  color: #e2e8f0;
+}
+
+.bar-flyout {
+  display: none;
+}
+
+.bar-flyout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .toast-card {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+@media (max-width: 960px) {
+  .bar-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .side-dock {
+    display: none;
+  }
+
+  .bar-quick-nav {
+    display: flex;
+  }
+
+  .floating-joystick {
+    display: block;
+  }
+
+  .bar-stage {
+    position: relative;
+  }
+
+  .scene-shell {
+    padding: 10px;
+  }
+
+  .scene-root {
+    aspect-ratio: 9 / 16;
+    min-height: 60vh;
+  }
+
+  .bar-flyout {
+    display: block;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 40;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 12px;
+    max-height: 65vh;
+    overflow: auto;
+  }
 }
 
 @media (max-width: 768px) {

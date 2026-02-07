@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { MutableRefObject } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import SceneRoot from '../three/SceneRoot';
@@ -10,6 +11,7 @@ type RendererStub = {
   setPixelRatio: ReturnType<typeof vi.fn>;
   render: ReturnType<typeof vi.fn>;
   dispose: ReturnType<typeof vi.fn>;
+  setAnimationLoop?: (callback: ((time: number) => void) | null) => void;
 };
 
 function createRendererStub(): RendererStub {
@@ -20,6 +22,7 @@ function createRendererStub(): RendererStub {
     setPixelRatio: vi.fn(),
     render: vi.fn(),
     dispose: vi.fn(),
+    setAnimationLoop: undefined,
   };
 }
 
@@ -160,5 +163,35 @@ describe('SceneRoot', () => {
     renderer.domElement.dispatchEvent(event as Event);
 
     expect(handleSelect).toHaveBeenCalledWith(playerProfile);
+  });
+
+  it('sends realtime transform when the player moves', () => {
+    let loop: ((time: number) => void) | undefined;
+    const renderer = {
+      ...createRendererStub(),
+      setAnimationLoop: vi.fn((cb: ((time: number) => void) | null) => {
+        loop = cb ?? undefined;
+      }),
+    } as RendererStub;
+    const sendTransform = vi.fn().mockResolvedValue(undefined);
+    const mobileMoveRef = { current: { x: 1, z: 0 } } as unknown as MutableRefObject<{ x: number; z: number }>;
+
+    render(
+      <SceneRoot
+        rendererFactory={() => renderer}
+        skipSupportCheck
+        loadScene={false}
+        roomId="test-room"
+        selfUserId="me"
+        sendTransform={sendTransform}
+        mobileMoveRef={mobileMoveRef}
+      />,
+    );
+
+    expect(renderer.setAnimationLoop).toHaveBeenCalled();
+    loop?.(0);
+    loop?.(120);
+
+    expect(sendTransform).toHaveBeenCalled();
   });
 });

@@ -6,6 +6,9 @@ import { createFpsMeter } from './fpsMeter';
 import { createNpcStates, createRng, stepNpcGroup } from './sim/npcSim';
 import { createNpcChatState, stepNpcChat } from './sim/npcChat';
 import { generateNearbyUsers, NearbyUser } from '../state/mockNearby';
+import { TransformSmoother } from '../net/realtime/transformSmoother';
+import { detectDeviceType } from '../net/realtime/rateLimitedProvider';
+import { AvatarTransformState, RealtimeProvider, RoomMemberState } from '../net/realtime/types';
 
 type RendererFactoryOptions = {
   antialias: boolean;
@@ -37,6 +40,11 @@ type SceneRootProps = {
   playerProfile?: NearbyUser;
   raycasterFactory?: () => THREE.Raycaster;
   enableNpcCrowdSim?: boolean;
+  roomId?: string;
+  selfUserId?: string;
+  roomMembers?: RoomMemberState[];
+  sendTransform?: (transform: Omit<AvatarTransformState, 'roomId' | 'seq'>) => Promise<void>;
+  realtimeProvider?: RealtimeProvider;
 };
 
 const defaultRendererFactory = (options: RendererFactoryOptions): RendererLike =>
@@ -100,6 +108,11 @@ function SceneRoot({
   playerProfile,
   raycasterFactory,
   enableNpcCrowdSim = true,
+  roomId,
+  selfUserId,
+  roomMembers,
+  sendTransform,
+  realtimeProvider,
 }: SceneRootProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
@@ -115,6 +128,17 @@ function SceneRoot({
   const yawRef = useRef(0);
   const pitchRef = useRef(0);
   const pointerLockedRef = useRef(false);
+  const roomMembersRef = useRef<RoomMemberState[]>(roomMembers ?? []);
+  const realtimeSyncRef = useRef<{ syncMembers?: (members: RoomMemberState[]) => void } | null>(null);
+  const lastTransformSentAtRef = useRef<number>(-Infinity);
+  const deviceType = useMemo(() => detectDeviceType(), []);
+  const transformIntervalMs = useMemo(() => (deviceType === 'mobile' ? 70 : 50), [deviceType]);
+  const idleTransformIntervalMs = 900;
+
+  useEffect(() => {
+    roomMembersRef.current = roomMembers ?? [];
+    realtimeSyncRef.current?.syncMembers?.(roomMembers ?? []);
+  }, [roomMembers]);
 
   useEffect(() => {
     const mountEl = mountRef.current;
@@ -211,6 +235,102 @@ function SceneRoot({
     const npcProfiles = npcCount ? generateNearbyUsers({ seed: profileSeed ?? npcSeed, count: npcCount }) : [];
     const npcChatState = npcCount ? createNpcChatState({ npcCount, seed: npcSeed + 211 }) : null;
     const npcChatRng = npcCount ? createRng(npcSeed + 503) : null;
+    const npcTransformSmoothers = npcCount
+      ? Array.from({ length: npcCount }, () => new TransformSmoother({ bufferMs: 140, snapDistance: 2 }))
+      : [];
+    const npcSeqCounters = npcCount ? Array.from({ length: npcCount }, () => 0) : [];
+    const remoteAvatarGroups: THREE.Group[] = [];
+    const remoteAvatars = new Map<
+      string,
+      { group: THREE.Group; smoother: TransformSmoother; materials: THREE.Material[] }
+    >();
+
+    const hashUserId = (id: string) => {
+      let hash = 0;
+      for (let i = 0; i < id.length; i += 1) {
+        hash = (hash * 31 + id.charCodeAt(i)) | 0;
+      }
+      return Math.abs(hash);
+    };
+
+    const remoteColorForUser = (id: string) => {
+      const palette = [0x38bdf8, 0xa855f7, 0xf97316, 0x22c55e, 0xf43f5e, 0x14b8a6];
+      return palette[hashUserId(id) % palette.length];
+    };
+
+    const ensureRemoteAvatar = (member: RoomMemberState) => {
+      if (!member || member.userId === selfUserId) return null;
+      let entry = remoteAvatars.get(member.userId);
+      if (!entry) {
+        const group = new THREE.Group();
+        group.userData.userId = member.userId;
+        const torsoMaterial = new THREE.MeshStandardMaterial({
+          color: remoteColorForUser(member.userId),
+          metalness: 0.05,
+          roughness: 0.45,
+        });
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.04, roughness: 0.6 });
+        const torso = new THREE.Mesh(npcTorsoGeometry, torsoMaterial);
+        torso.castShadow = shadowsEnabled;
+        torso.receiveShadow = shadowsEnabled;
+        const head = new THREE.Mesh(npcHeadGeometry, headMaterial);
+        head.position.set(0, 0.58, 0);
+        head.castShadow = shadowsEnabled;
+        head.receiveShadow = shadowsEnabled;
+        group.add(torso);
+        group.add(head);
+        scene.add(group);
+        remoteAvatarGroups.push(group);
+        entry = {
+          group,
+          smoother: new TransformSmoother({ bufferMs: 120, snapDistance: 1.8, snapRotation: Math.PI / 1.4 }),
+          materials: [torsoMaterial, headMaterial],
+        };
+        remoteAvatars.set(member.userId, entry);
+      }
+      entry.group.position.set(member.x ?? 0, member.y ?? 0.3, member.z ?? 0);
+      entry.group.rotation.y = member.rotY ?? 0;
+      return entry;
+    };
+
+    const removeRemoteAvatar = (userId: string) => {
+      const entry = remoteAvatars.get(userId);
+      if (!entry) return;
+      scene.remove(entry.group);
+      const idx = remoteAvatarGroups.indexOf(entry.group);
+      if (idx >= 0) remoteAvatarGroups.splice(idx, 1);
+      entry.materials.forEach((mat) => mat.dispose());
+      remoteAvatars.delete(userId);
+    };
+
+    const syncRemoteMembers = (members: RoomMemberState[]) => {
+      const seen = new Set<string>();
+      const nowTs = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      members.forEach((member) => {
+        if (!member || member.userId === selfUserId) return;
+        seen.add(member.userId);
+        const entry = ensureRemoteAvatar(member);
+        if (entry) {
+          entry.smoother.ingestSample({
+            userId: member.userId,
+            seq: 0,
+            x: member.x,
+            y: member.y,
+            z: member.z,
+            rotY: member.rotY,
+            anim: member.anim,
+            speaking: member.speaking,
+            ts: nowTs,
+          });
+        }
+      });
+      remoteAvatars.forEach((_entry, userId) => {
+        if (!seen.has(userId)) removeRemoteAvatar(userId);
+      });
+    };
+
+    syncRemoteMembers(roomMembersRef.current);
+    realtimeSyncRef.current = { syncMembers: syncRemoteMembers };
     const chatOverlay = npcCount ? document.createElement('div') : null;
     const fpsOverlay = document.createElement('div');
     if (chatOverlay) {
@@ -383,6 +503,31 @@ function SceneRoot({
     const npcSeparationRadius = 0.7;
     const separationVector = new THREE.Vector3();
     const fpsMeter = createFpsMeter();
+    const unsubscribeTransform = realtimeProvider?.on('avatar_transform_broadcast', (event) => {
+      if (event.payload.userId === selfUserId) return;
+      const member = roomMembersRef.current.find((m) => m.userId === event.payload.userId);
+      const fallbackMember: RoomMemberState = member ?? {
+        userId: event.payload.userId,
+        displayName: event.payload.userId,
+        avatarId: 'sim',
+        x: event.payload.x,
+        y: event.payload.y,
+        z: event.payload.z,
+        rotY: event.payload.rotY,
+        anim: event.payload.anim,
+        speaking: event.payload.speaking,
+      };
+      const entry = ensureRemoteAvatar(fallbackMember);
+      entry?.smoother.ingest(event);
+    });
+
+    const unsubscribeRoomState = realtimeProvider?.on('room_state', (event) => {
+      syncRemoteMembers(event.payload.members);
+    });
+
+    const unsubscribeMemberLeft = realtimeProvider?.on('member_left', (event) => {
+      removeRemoteAvatar(event.payload.userId);
+    });
 
     const raycaster = raycasterFactory ? raycasterFactory() : new THREE.Raycaster();
     const pointer = new THREE.Vector2();
@@ -395,7 +540,9 @@ function SceneRoot({
       pointer.x = (offsetX / targetWidth) * 2 - 1;
       pointer.y = -(offsetY / targetHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const objectsToPick = playerRef.current ? [...npcGroups, playerRef.current] : npcGroups;
+      const objectsToPick = playerRef.current
+        ? [...npcGroups, ...remoteAvatarGroups, playerRef.current]
+        : [...npcGroups, ...remoteAvatarGroups];
       const hits = raycaster.intersectObjects(objectsToPick, true);
       if (!hits.length) return;
       const hit = hits[0];
@@ -435,6 +582,7 @@ function SceneRoot({
     let usingAnimationLoop = false;
     const renderLoop = () => {
       const dt = clock.getDelta();
+      const frameNow = typeof performance !== 'undefined' ? performance.now() : Date.now();
       const player = playerRef.current;
       const move2 = computeMoveVector(pressedKeysRef.current);
       moveVector.set(move2.x, 0, move2.z);
@@ -477,8 +625,41 @@ function SceneRoot({
           const bob = npc.state === 'walk' ? Math.sin(npc.phase) * 0.04 : Math.sin(npc.phase * 0.6) * 0.02;
           const group = npcGroups[idx];
           npc.position.y = baseY;
-          group.position.set(npc.position.x, npc.position.y + bob, npc.position.z);
-          group.rotation.y = npc.heading;
+          const smoother = npcTransformSmoothers[idx];
+          if (smoother) {
+            const seq = (npcSeqCounters[idx] += 1);
+            smoother.ingestSample({
+              userId: npcProfiles[idx]?.id ?? `npc-${idx}`,
+              seq,
+              x: npc.position.x,
+              y: npc.position.y,
+              z: npc.position.z,
+              rotY: npc.heading,
+              anim: npc.state === 'walk' ? 'walk' : 'idle',
+              speaking: false,
+              ts: frameNow,
+            });
+            const smoothed = smoother.getSmoothed(frameNow);
+            const targetX = smoothed?.x ?? npc.position.x;
+            const targetZ = smoothed?.z ?? npc.position.z;
+            const targetRot = smoothed?.rotY ?? npc.heading;
+            const targetY = smoothed?.y ?? npc.position.y;
+            group.position.set(targetX, targetY + bob, targetZ);
+            group.rotation.y = targetRot;
+          } else {
+            group.position.set(npc.position.x, npc.position.y + bob, npc.position.z);
+            group.rotation.y = npc.heading;
+          }
+        });
+      }
+
+      if (remoteAvatars.size) {
+        remoteAvatars.forEach((entry) => {
+          const smoothed = entry.smoother.getSmoothed(frameNow);
+          if (!smoothed) return;
+          const bob = smoothed.anim === 'walk' ? Math.sin(frameNow / 160) * 0.04 : 0;
+          entry.group.position.set(smoothed.x, (smoothed.y ?? baseY) + bob, smoothed.z);
+          entry.group.rotation.y = smoothed.rotY;
         });
       }
 
@@ -605,6 +786,22 @@ function SceneRoot({
       cameraRig.rotation.y = yawRef.current;
       pitchGroup.rotation.x = pitchRef.current;
 
+      if (player && sendTransform && roomId) {
+        const sinceLast = frameNow - lastTransformSentAtRef.current;
+        const interval = isMoving ? transformIntervalMs : idleTransformIntervalMs;
+        if (sinceLast >= interval) {
+          lastTransformSentAtRef.current = frameNow;
+          void sendTransform({
+            x: player.position.x,
+            y: player.position.y,
+            z: player.position.z,
+            rotY: player.rotation.y,
+            anim: isMoving ? 'walk' : 'idle',
+            speaking: false,
+          });
+        }
+      }
+
       const fps = fpsMeter.tick(performance.now());
       fpsOverlay.textContent = `FPS: ${Number.isFinite(fps) ? fps.toFixed(0) : '--'}`;
 
@@ -641,9 +838,18 @@ function SceneRoot({
           document.exitPointerLock?.();
         }
       }
+      unsubscribeTransform?.();
+      unsubscribeRoomState?.();
+      unsubscribeMemberLeft?.();
       if (loadedScene) {
         scene.remove(loadedScene);
       }
+      remoteAvatars.forEach((entry) => {
+        scene.remove(entry.group);
+        entry.materials.forEach((mat) => mat.dispose());
+      });
+      remoteAvatars.clear();
+      remoteAvatarGroups.splice(0, remoteAvatarGroups.length);
       if (playerRef.current) {
         scene.remove(playerRef.current);
         playerRef.current = null;
@@ -674,7 +880,7 @@ function SceneRoot({
       npcMaterials.forEach((mat) => mat.dispose());
       renderer = null;
     };
-  }, [enableNpcCrowdSim, enableShadows, gltfUrl, lights, loadScene, loaderFactory, mobileLookDeltaRef, mobileMoveRef, onSelectProfile, playerProfile, profileSeed, quality, raycasterFactory, rendererFactory, skipSupportCheck]);
+  }, [enableNpcCrowdSim, enableShadows, gltfUrl, idleTransformIntervalMs, lights, loadScene, loaderFactory, mobileLookDeltaRef, mobileMoveRef, onSelectProfile, playerProfile, profileSeed, quality, raycasterFactory, realtimeProvider, rendererFactory, roomId, selfUserId, sendTransform, skipSupportCheck, transformIntervalMs]);
 
   return (
     <div className="scene-root" ref={mountRef} data-testid="scene-root">
