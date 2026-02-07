@@ -19,9 +19,10 @@ describe('RoomsPage', () => {
     const { rooms } = generateMockData({ seed: DEFAULT_MOCK_SEED });
     const list = screen.getByLabelText(/Room list/i);
     const firstRoom = rooms[0];
-    expect(within(list).getByText(firstRoom.name)).toBeInTheDocument();
-    expect(within(list).getByText(firstRoom.topic)).toBeInTheDocument();
-    expect(within(list).getByText(new RegExp(`${firstRoom.occupants} online`))).toBeInTheDocument();
+    const card = within(list).getByText(firstRoom.name).closest('.route-chip') as HTMLElement;
+    expect(card).toBeTruthy();
+    expect(within(card).getByText(firstRoom.topic)).toBeInTheDocument();
+    expect(within(card).getByText(new RegExp(`${firstRoom.occupants} online`))).toBeInTheDocument();
   });
 
   it('filters by theme and updates hottest CTA within the filtered set', () => {

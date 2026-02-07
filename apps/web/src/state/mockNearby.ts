@@ -5,68 +5,53 @@ export type NearbyUser = {
   displayName: string;
   avatarPreset: string;
   sharedInterests: string[];
-  x: number;
-  y: number;
-  distance: number;
+  region: string;
+  affinityScore: number;
 };
 
 export type NearbyOptions = {
   seed?: string | number;
   count?: number;
-  maxRadius?: number;
 };
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function computeDistance(x: number, y: number) {
-  return Math.sqrt(x * x + y * y);
+function scoreAffinity(sharedInterests: string[], rng: () => number): number {
+  return sharedInterests.length * 10 + Math.floor(rng() * 10);
 }
 
 export function generateNearbyUsers(options: NearbyOptions = {}): NearbyUser[] {
   const seed = options.seed ?? DEFAULT_MOCK_SEED;
   const count = options.count ?? 8;
-  const maxRadius = options.maxRadius ?? 30;
   const rng = createSeededRng(`${seed}-nearby`);
   const { users } = generateMockData({ seed });
   const picked = users.slice(0, count);
 
-  return picked.map((user, index) => {
-    const x = rng() * maxRadius * (rng() > 0.5 ? 1 : -1);
-    const y = rng() * maxRadius * (rng() > 0.5 ? 1 : -1);
+  return picked.map((user) => {
+    const sharedInterests = user.interests.slice(0, 3);
     return {
       id: user.id,
       displayName: user.displayName,
       avatarPreset: user.avatarPreset,
-      sharedInterests: user.interests.slice(0, 2),
-      x,
-      y,
-      distance: computeDistance(x, y) + index * 0.01, // slight tie breaker for stability
+      sharedInterests,
+      region: user.region ?? 'Global',
+      affinityScore: scoreAffinity(sharedInterests, rng),
     };
   });
 }
 
 export function sortNearby(users: NearbyUser[]): NearbyUser[] {
-  return [...users].sort((a, b) => a.distance - b.distance);
+  return [...users].sort((a, b) => {
+    if (a.region !== b.region) return a.region.localeCompare(b.region);
+    if (b.affinityScore !== a.affinityScore) return b.affinityScore - a.affinityScore;
+    return a.displayName.localeCompare(b.displayName);
+  });
 }
 
-export function driftNearbyUsers(
-  users: NearbyUser[],
-  rng: () => number,
-  maxStep = 2.5,
-  maxRadius = 35,
-): NearbyUser[] {
+export function driftNearbyUsers(users: NearbyUser[], rng: () => number): NearbyUser[] {
   return users.map((user) => {
-    const stepX = (rng() * 2 - 1) * maxStep;
-    const stepY = (rng() * 2 - 1) * maxStep;
-    const nextX = clamp(user.x + stepX, -maxRadius, maxRadius);
-    const nextY = clamp(user.y + stepY, -maxRadius, maxRadius);
+    const updatedAffinity = user.affinityScore + Math.floor(rng() * 6) - 2; // small wobble
     return {
       ...user,
-      x: nextX,
-      y: nextY,
-      distance: computeDistance(nextX, nextY),
+      affinityScore: Math.max(0, updatedAffinity),
     };
   });
 }

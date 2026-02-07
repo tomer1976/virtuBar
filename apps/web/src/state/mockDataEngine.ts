@@ -6,6 +6,7 @@ export type MockUser = {
   avatarPreset: string;
   interests: string[];
   homeRoomId: string;
+  region: string;
 };
 
 export type MockDataResult = {
@@ -37,6 +38,7 @@ const topicByTheme: Record<RoomTheme, string[]> = {
 };
 const userFirstNames = ['Nova', 'Riley', 'Jordan', 'Sage', 'Alex', 'Kai', 'Morgan', 'Skye'];
 const userLastNames = ['Blaze', 'Ray', 'Hart', 'Vale', 'Wilde', 'Stone', 'Echo', 'Storm'];
+const userRegions = ['US', 'UK', 'CA', 'EU', 'AU', 'JP', 'BR', 'IN'];
 
 function hashSeed(seed: string | number): number {
   if (typeof seed === 'number') return seed >>> 0;
@@ -128,6 +130,7 @@ function buildUser(rng: () => number, roomId: string, index: number): MockUser {
     avatarPreset: pick(avatarPresets, rng),
     interests: sampleInterests(rng),
     homeRoomId: roomId,
+    region: pick(userRegions, rng),
   };
 }
 
