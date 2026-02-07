@@ -6,7 +6,8 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 ## Frontend Tasks
 - [x] Define `RealtimeProvider` TypeScript interface (connect/disconnect, joinRoom/leaveRoom, sendTransform, sendChat, sendEmote, subscribe handlers) matching `realtime-protocol.md` event shapes.
 	- Added protocol-aligned types, envelopes, limits, and tests under apps/web/src/net/realtime.
-- [ ] Implement simulation provider that maintains in-memory room state and emits `room_state`, `member_joined`, `member_left`, `avatar_transform_broadcast`, `chat_broadcast` events.
+- [x] Implement simulation provider that maintains in-memory room state and emits `room_state`, `member_joined`, `member_left`, `avatar_transform_broadcast`, `chat_broadcast` events.
+	- Added in-memory sim provider with shared room state and tests covering join/member events, transforms, chat limits, and leaves.
 - [ ] Add provider selector flag `REALTIME_PROVIDER=sim|ws` (default sim) with DI wiring in app bootstrapping.
 - [ ] Implement transform smoothing/interpolation buffer (100–200ms) with snap thresholds; integrate with avatar render pipeline.
 - [ ] Enforce client-side rate limits: transforms (20/sec desktop, 15/sec mobile), chat length max per protocol; drop or delay over-limit events with optional debug log.

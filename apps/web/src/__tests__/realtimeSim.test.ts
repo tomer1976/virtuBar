@@ -1,0 +1,144 @@
+import { vi } from 'vitest';
+import { CHAT_MAX_LENGTH, DESKTOP_TRANSFORM_RATE_LIMIT, RealtimeEnvelope, RealtimeServerPayloadMap } from '../net/realtime/types';
+import { __resetSimStateForTests, createSimProvider } from '../net/realtime/simProvider';
+
+function collectEvents<T extends keyof RealtimeServerPayloadMap>(eventName: T) {
+  const events: RealtimeEnvelope<T, RealtimeServerPayloadMap[T]>[] = [];
+  return {
+    events,
+    handler: (event: RealtimeEnvelope<T, RealtimeServerPayloadMap[T]>) => events.push(event),
+    eventName,
+  };
+}
+
+describe('SimRealtimeProvider', () => {
+  beforeEach(() => {
+    __resetSimStateForTests();
+  });
+
+  afterEach(() => {
+    __resetSimStateForTests();
+    vi.useRealTimers();
+  });
+
+  it('joins a room and emits room state and member_joined to others', async () => {
+    const providerA = createSimProvider();
+    const providerB = createSimProvider();
+
+    await providerA.connect();
+    await providerB.connect();
+
+    const aState = collectEvents('room_state');
+    const aJoined = collectEvents('member_joined');
+    providerA.on(aState.eventName, aState.handler);
+    providerA.on(aJoined.eventName, aJoined.handler);
+
+    await providerA.joinRoom({
+      roomId: 'room-1',
+      deviceType: 'desktop',
+      user: { userId: 'user-a', displayName: 'A', avatarId: 'ava' },
+    });
+
+    const bState = collectEvents('room_state');
+    providerB.on(bState.eventName, bState.handler);
+    await providerB.joinRoom({
+      roomId: 'room-1',
+      deviceType: 'desktop',
+      user: { userId: 'user-b', displayName: 'B', avatarId: 'avb' },
+    });
+
+    expect(aState.events[0]?.payload.members).toHaveLength(1);
+    expect(bState.events[0]?.payload.members).toHaveLength(2);
+    expect(aJoined.events[0]?.payload.member.userId).toBe('user-b');
+  });
+
+  it('broadcasts transforms within rate limits', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_710_000_000_000);
+
+    const sender = createSimProvider();
+    const receiver = createSimProvider();
+    await sender.connect();
+    await receiver.connect();
+
+    const transforms = collectEvents('avatar_transform_broadcast');
+    receiver.on(transforms.eventName, transforms.handler);
+
+    await sender.joinRoom({
+      roomId: 'room-rt',
+      deviceType: 'desktop',
+      user: { userId: 'sender', displayName: 'S', avatarId: 'as' },
+    });
+    await receiver.joinRoom({
+      roomId: 'room-rt',
+      deviceType: 'desktop',
+      user: { userId: 'receiver', displayName: 'R', avatarId: 'ar' },
+    });
+
+    for (let i = 0; i < DESKTOP_TRANSFORM_RATE_LIMIT + 5; i += 1) {
+      await sender.sendTransform({
+        roomId: 'room-rt',
+        seq: i,
+        x: i,
+        y: 0,
+        z: i * -1,
+        rotY: 0,
+        anim: 'walk',
+        speaking: false,
+      });
+    }
+
+    expect(transforms.events.length).toBeLessThanOrEqual(DESKTOP_TRANSFORM_RATE_LIMIT);
+  });
+
+  it('drops chat messages that exceed the max length', async () => {
+    const sender = createSimProvider();
+    const receiver = createSimProvider();
+    await sender.connect();
+    await receiver.connect();
+
+    const chats = collectEvents('chat_broadcast');
+    receiver.on(chats.eventName, chats.handler);
+
+    await sender.joinRoom({
+      roomId: 'room-chat',
+      deviceType: 'desktop',
+      user: { userId: 'chat-a', displayName: 'A', avatarId: 'aa' },
+    });
+    await receiver.joinRoom({
+      roomId: 'room-chat',
+      deviceType: 'desktop',
+      user: { userId: 'chat-b', displayName: 'B', avatarId: 'ab' },
+    });
+
+    const longText = 'x'.repeat(CHAT_MAX_LENGTH + 5);
+    await sender.sendChat({ roomId: 'room-chat', text: longText, mode: 'local' });
+
+    expect(chats.events.length).toBe(0);
+  });
+
+  it('broadcasts member_left when leaving a room', async () => {
+    const providerA = createSimProvider();
+    const providerB = createSimProvider();
+
+    await providerA.connect();
+    await providerB.connect();
+
+    const leftEvents = collectEvents('member_left');
+    providerA.on(leftEvents.eventName, leftEvents.handler);
+
+    await providerA.joinRoom({
+      roomId: 'room-leave',
+      deviceType: 'desktop',
+      user: { userId: 'user-a', displayName: 'A', avatarId: 'ava' },
+    });
+    await providerB.joinRoom({
+      roomId: 'room-leave',
+      deviceType: 'desktop',
+      user: { userId: 'user-b', displayName: 'B', avatarId: 'avb' },
+    });
+
+    await providerB.leaveRoom('room-leave');
+    expect(leftEvents.events[0]?.payload.userId).toBe('user-b');
+  });
+});
