@@ -47,7 +47,7 @@ function hashSeed(seed: string | number): number {
   return hash >>> 0;
 }
 
-function createRng(seed: string | number): () => number {
+export function createSeededRng(seed: string | number): () => number {
   const m = 2 ** 32;
   const a = 1664525;
   const c = 1013904223;
@@ -132,7 +132,7 @@ function buildUser(rng: () => number, roomId: string, index: number): MockUser {
 }
 
 export function generateMockData(options: MockDataOptions = {}): MockDataResult {
-  const rng = createRng(options.seed ?? DEFAULT_MOCK_SEED);
+  const rng = createSeededRng(options.seed ?? DEFAULT_MOCK_SEED);
   const roomCount = clamp(
     Math.floor(rng() * ((options.maxRooms ?? 15) - (options.minRooms ?? 5) + 1)) + (options.minRooms ?? 5),
     options.minRooms ?? 5,
@@ -167,4 +167,29 @@ export function describeFilter(filter: RoomFilter): string {
     default:
       return 'All themes';
   }
+}
+
+export type OccupancyDriftOptions = {
+  maxStep?: number;
+  minOccupants?: number;
+  maxOccupants?: number;
+};
+
+export function driftRoomsOccupancy(
+  rooms: MockRoom[],
+  rng: () => number,
+  options: OccupancyDriftOptions = {},
+): MockRoom[] {
+  const maxStep = options.maxStep ?? 3;
+  const minOccupants = options.minOccupants ?? 4;
+  const maxOccupants = options.maxOccupants ?? 80;
+
+  return rooms.map((room) => {
+    let delta = Math.floor(rng() * (maxStep * 2 + 1)) - maxStep; // range [-maxStep, +maxStep]
+    if (delta === 0) {
+      delta = rng() > 0.5 ? 1 : -1; // avoid no-op to keep UI lively
+    }
+    const nextOccupants = clamp(room.occupants + delta, minOccupants, maxOccupants);
+    return { ...room, occupants: nextOccupants };
+  });
 }

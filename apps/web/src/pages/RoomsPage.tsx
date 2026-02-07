@@ -1,5 +1,10 @@
-import { useMemo, useState } from 'react';
-import { DEFAULT_MOCK_SEED, generateMockData } from '../state/mockDataEngine';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  createSeededRng,
+  DEFAULT_MOCK_SEED,
+  driftRoomsOccupancy,
+  generateMockData,
+} from '../state/mockDataEngine';
 import {
   filterRoomsByTheme,
   getHottestRoom,
@@ -8,9 +13,34 @@ import {
 } from '../state/mockRooms';
 import { Button } from '../ui/components';
 
-function RoomsPage() {
-  const { rooms } = useMemo(() => generateMockData({ seed: DEFAULT_MOCK_SEED }), []);
+type RoomsPageProps = {
+  seed?: string | number;
+  driftMs?: number;
+  enableDrift?: boolean;
+};
+
+function RoomsPage({ seed, driftMs = 4000, enableDrift = true }: RoomsPageProps) {
+  const resolvedSeed = seed ?? DEFAULT_MOCK_SEED;
+  const { rooms: initialRooms } = useMemo(() => generateMockData({ seed: resolvedSeed }), [resolvedSeed]);
+  const [rooms, setRooms] = useState(initialRooms);
   const [filter, setFilter] = useState<RoomFilter>('all');
+  const rngRef = useRef<() => number>();
+
+  useEffect(() => {
+    setRooms(initialRooms);
+  }, [initialRooms]);
+
+  useEffect(() => {
+    rngRef.current = createSeededRng(`${resolvedSeed}-drift`);
+  }, [resolvedSeed]);
+
+  useEffect(() => {
+    if (!enableDrift) return undefined;
+    const id = window.setInterval(() => {
+      setRooms((prev) => driftRoomsOccupancy(prev, rngRef.current ?? createSeededRng(`${resolvedSeed}-drift`)));
+    }, driftMs);
+    return () => window.clearInterval(id);
+  }, [driftMs, enableDrift, resolvedSeed]);
 
   const filteredRooms = useMemo(() => filterRoomsByTheme(rooms, filter), [filter, rooms]);
   const hottestRoom = useMemo(

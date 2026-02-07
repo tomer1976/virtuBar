@@ -1,6 +1,12 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { vi } from 'vitest';
 import RoomsPage from '../pages/RoomsPage';
-import { DEFAULT_MOCK_SEED, generateMockData } from '../state/mockDataEngine';
+import {
+  createSeededRng,
+  DEFAULT_MOCK_SEED,
+  driftRoomsOccupancy,
+  generateMockData,
+} from '../state/mockDataEngine';
 import { getHottestRoom, mockRoomFilters } from '../state/mockRooms';
 
 function renderPage() {
@@ -44,5 +50,28 @@ describe('RoomsPage', () => {
     const filteredHottest = getHottestRoom(filteredRooms);
     const filteredCta = screen.getByRole('link', { name: /Join hottest room/i });
     expect(filteredCta).toHaveAttribute('href', `/bar/${filteredHottest.id}`);
+  });
+
+  it('drifts occupancy over time without reload', () => {
+    vi.useFakeTimers();
+    const seed = 'drift-seed';
+    const { rooms } = generateMockData({ seed });
+    render(<RoomsPage seed={seed} driftMs={20} enableDrift />);
+
+    const list = screen.getByLabelText(/Room list/i);
+    const firstRoom = rooms[0];
+    const roomCard = within(list).getByText(firstRoom.name).closest('.route-chip') as HTMLElement;
+    expect(roomCard).toBeTruthy();
+    expect(within(roomCard).getByText(new RegExp(`${firstRoom.occupants} online`))).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(25);
+    });
+
+    const expectedRooms = driftRoomsOccupancy(rooms, createSeededRng(`${seed}-drift`));
+    const updatedCard = within(list).getByText(firstRoom.name).closest('.route-chip') as HTMLElement;
+    expect(updatedCard).toBeTruthy();
+    expect(within(updatedCard).getByText(new RegExp(`${expectedRooms[0].occupants} online`))).toBeInTheDocument();
+    vi.useRealTimers();
   });
 });
