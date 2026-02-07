@@ -4,7 +4,8 @@
 Implement a protocol-compatible realtime simulation with a pluggable provider interface, enabling multi-tab simulated multiplayer and smoothing while keeping everything client-only.
 
 ## Frontend Tasks
-- [ ] Define `RealtimeProvider` TypeScript interface (connect/disconnect, joinRoom/leaveRoom, sendTransform, sendChat, sendEmote, subscribe handlers) matching `realtime-protocol.md` event shapes.
+- [x] Define `RealtimeProvider` TypeScript interface (connect/disconnect, joinRoom/leaveRoom, sendTransform, sendChat, sendEmote, subscribe handlers) matching `realtime-protocol.md` event shapes.
+	- Added protocol-aligned types, envelopes, limits, and tests under apps/web/src/net/realtime.
 - [ ] Implement simulation provider that maintains in-memory room state and emits `room_state`, `member_joined`, `member_left`, `avatar_transform_broadcast`, `chat_broadcast` events.
 - [ ] Add provider selector flag `REALTIME_PROVIDER=sim|ws` (default sim) with DI wiring in app bootstrapping.
 - [ ] Implement transform smoothing/interpolation buffer (100–200ms) with snap thresholds; integrate with avatar render pipeline.

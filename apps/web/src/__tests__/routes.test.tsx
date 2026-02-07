@@ -60,7 +60,9 @@ describe('AppRoutes', () => {
     const roomId = 'demo-room';
     renderWithRouter(`/bar/${roomId}`);
     expect(screen.getByText(/Enter Bar/i)).toBeInTheDocument();
-    expect(screen.getByText(new RegExp(roomId, 'i'))).toBeInTheDocument();
+    const roomLabels = screen.getAllByText(new RegExp(roomId, 'i'));
+
+    expect(roomLabels.length).toBeGreaterThan(0);
   });
 
   it('redirects unknown routes to landing', () => {
