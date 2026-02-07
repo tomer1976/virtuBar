@@ -10,6 +10,11 @@ Last Updated: 2026-02-06
 - staging: pre-prod
 - prod: live
 
+### Dev env config (web)
+- Copy `apps/web/.env.example` to `.env.local` for Vite.
+- `VITE_REALTIME_PROVIDER=sim` (ws not implemented yet).
+- Optional debug: `VITE_REALTIME_DEBUG=1` (rate-limit logging), `VITE_REALTIME_LOG_EVENTS=1` (event traces).
+
 ## 2. CI/CD
 - Lint + test on PR
 - Build web + server docker images

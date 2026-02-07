@@ -26,22 +26,30 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 	- Backend intentionally deferred; phase remains client-only simulation.
 
 ## Realtime Tasks (if applicable)
-- [ ] Keep provider purely client-side; ensure shapes match `realtime-protocol.md` to enable Phase 7 swap.
+- [x] Keep provider purely client-side; ensure shapes match `realtime-protocol.md` to enable Phase 7 swap.
+	- Sim provider remains in-memory only; event envelopes and payloads match docs/realtime-protocol.md via apps/web/src/net/realtime/types.
 
 ## Voice Tasks (if applicable)
-- [ ] Voice remains mocked; no changes.
+- [x] Voice remains mocked; no changes.
+	- No voice wiring added; `USE_MOCK_VOICE` still defaults to true.
 
 ## Infrastructure / DevOps Tasks (if applicable)
-- [ ] Add minimal config/env handling for `REALTIME_PROVIDER` flag in dev builds.
-- [ ] Optional: add lightweight logging toggle for simulation events to aid QA.
+- [x] Add minimal config/env handling for `REALTIME_PROVIDER` flag in dev builds.
+	- Added apps/web/.env.example and devops.md guidance for Vite `VITE_REALTIME_PROVIDER`.
+- [x] Optional: add lightweight logging toggle for simulation events to aid QA.
+	- Added env-driven debug switches `VITE_REALTIME_DEBUG` (rate limit logs) and `VITE_REALTIME_LOG_EVENTS` (event tracing) in provider factory.
 
 ## State & Mock Replacement Tasks
-- [ ] Document simulation behavior, rate limits, and identity override mechanism; ensure defaults remain mock/sim.
+- [x] Document simulation behavior, rate limits, and identity override mechanism; ensure defaults remain mock/sim.
+	- Added realtime simulation section in docs/mocks.md covering rate limits, identity overrides, and env toggles.
 
 ## File-Level Guidance
-- [ ] Place provider interfaces in `apps/web/src/net/realtime` (or shared package if reused later); keep sim implementation nearby.
-- [ ] Add smoothing utilities near avatar rendering logic to avoid cross-layer churn.
-- [ ] Keep protocol event types in `packages/shared/types` or `.../zod` for validation.
+- [x] Place provider interfaces in `apps/web/src/net/realtime` (or shared package if reused later); keep sim implementation nearby.
+	- Provider factory, sim provider, and helpers live under apps/web/src/net/realtime.
+- [x] Add smoothing utilities near avatar rendering logic to avoid cross-layer churn.
+	- Transform smoothing utilities live in the realtime layer and feed SceneRoot avatar rendering.
+- [x] Keep protocol event types in `packages/shared/types` or `.../zod` for validation.
+	- Protocol-aligned types centralized in apps/web/src/net/realtime/types for now; ready to hoist to shared when backend arrives.
 
 ## Validation & Testing
 - [ ] Open two browser tabs with different mock identities; join same room and verify mutual movement and chat visibility.

@@ -2,6 +2,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo } from
 import {
   createRealtimeProvider,
   RealtimeProviderKind,
+  resolveRealtimeDebugOptions,
   resolveRealtimeProviderKind,
 } from '../../net/realtime/providerFactory';
 import { RealtimeProvider } from '../../net/realtime/types';
@@ -22,7 +23,9 @@ export function RealtimeClientProvider({ children }: PropsWithChildren) {
     [flags.USE_MOCK_REALTIME],
   );
 
-  const provider = useMemo(() => createRealtimeProvider(kind), [kind]);
+  const debugOptions = useMemo(() => resolveRealtimeDebugOptions(import.meta.env), []);
+
+  const provider = useMemo(() => createRealtimeProvider(kind, debugOptions), [kind, debugOptions]);
 
   useEffect(() => {
     return () => {
