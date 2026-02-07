@@ -2,6 +2,7 @@ import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { computeMoveVector, trackKeyPresses } from './input';
+import { createFpsMeter } from './fpsMeter';
 import { createNpcStates, createRng, stepNpcGroup } from './sim/npcSim';
 import { createNpcChatState, stepNpcChat } from './sim/npcChat';
 import { generateNearbyUsers, NearbyUser } from '../state/mockNearby';
@@ -33,6 +34,7 @@ type SceneRootProps = {
   mobileLookDeltaRef?: MutableRefObject<{ dx: number; dy: number } | null>;
   profileSeed?: string | number;
   onSelectProfile?: (user: NearbyUser) => void;
+  playerProfile?: NearbyUser;
   raycasterFactory?: () => THREE.Raycaster;
   enableNpcCrowdSim?: boolean;
 };
@@ -95,6 +97,7 @@ function SceneRoot({
   mobileLookDeltaRef,
   profileSeed,
   onSelectProfile,
+  playerProfile,
   raycasterFactory,
   enableNpcCrowdSim = true,
 }: SceneRootProps) {
@@ -209,6 +212,7 @@ function SceneRoot({
     const npcChatState = npcCount ? createNpcChatState({ npcCount, seed: npcSeed + 211 }) : null;
     const npcChatRng = npcCount ? createRng(npcSeed + 503) : null;
     const chatOverlay = npcCount ? document.createElement('div') : null;
+    const fpsOverlay = document.createElement('div');
     if (chatOverlay) {
       chatOverlay.style.position = 'absolute';
       chatOverlay.style.inset = '0';
@@ -218,6 +222,20 @@ function SceneRoot({
       chatOverlay.setAttribute('data-testid', 'npc-chat-layer');
       mountEl.appendChild(chatOverlay);
     }
+    fpsOverlay.style.position = 'absolute';
+    fpsOverlay.style.right = '8px';
+    fpsOverlay.style.top = '8px';
+    fpsOverlay.style.padding = '6px 10px';
+    fpsOverlay.style.fontSize = '12px';
+    fpsOverlay.style.color = '#e5e7eb';
+    fpsOverlay.style.background = 'rgba(15, 23, 42, 0.7)';
+    fpsOverlay.style.border = '1px solid rgba(148, 163, 184, 0.4)';
+    fpsOverlay.style.borderRadius = '10px';
+    fpsOverlay.style.pointerEvents = 'none';
+    fpsOverlay.style.boxShadow = '0 6px 18px rgba(0,0,0,0.25)';
+    fpsOverlay.setAttribute('data-testid', 'fps-overlay');
+    fpsOverlay.textContent = 'FPS: --';
+    mountEl.appendChild(fpsOverlay);
     const chatBubbles: {
       id: string;
       npcIndex: number;
@@ -347,6 +365,7 @@ function SceneRoot({
 
       group.add(torso);
       group.add(head);
+      group.userData.isPlayer = true;
       group.position.set(0, 0.3, 0);
       playerRef.current = group;
       scene.add(group);
@@ -363,10 +382,11 @@ function SceneRoot({
     const separationRadius = 0.8;
     const npcSeparationRadius = 0.7;
     const separationVector = new THREE.Vector3();
+    const fpsMeter = createFpsMeter();
 
     const raycaster = raycasterFactory ? raycasterFactory() : new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    const pickNpc = (event: PointerEvent) => {
+    const pickAvatar = (event: PointerEvent) => {
       const rect = renderer?.domElement.getBoundingClientRect();
       const targetWidth = overlaySize.width;
       const targetHeight = overlaySize.height;
@@ -375,14 +395,22 @@ function SceneRoot({
       pointer.x = (offsetX / targetWidth) * 2 - 1;
       pointer.y = -(offsetY / targetHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(npcGroups, true);
+      const objectsToPick = playerRef.current ? [...npcGroups, playerRef.current] : npcGroups;
+      const hits = raycaster.intersectObjects(objectsToPick, true);
       if (!hits.length) return;
       const hit = hits[0];
       let object: THREE.Object3D | null = hit.object;
-      while (object && object.parent && object.userData?.npcIndex === undefined) {
+      while (object && object.parent && object.userData?.npcIndex === undefined && !object.userData?.isPlayer) {
         object = object.parent;
       }
-      const npcIndex: number | undefined = object?.userData?.npcIndex;
+      if (!object) return;
+      if (object.userData?.isPlayer) {
+        if (playerProfile && onSelectProfile) {
+          onSelectProfile(playerProfile);
+        }
+        return;
+      }
+      const npcIndex: number | undefined = object.userData?.npcIndex;
       if (npcIndex === undefined) return;
       const profile = npcProfiles[npcIndex];
       if (profile && onSelectProfile) {
@@ -577,6 +605,9 @@ function SceneRoot({
       cameraRig.rotation.y = yawRef.current;
       pitchGroup.rotation.x = pitchRef.current;
 
+      const fps = fpsMeter.tick(performance.now());
+      fpsOverlay.textContent = `FPS: ${Number.isFinite(fps) ? fps.toFixed(0) : '--'}`;
+
       platform.rotation.y += 0.01;
       renderer?.render(scene, camera);
       if (!usingAnimationLoop) {
@@ -591,7 +622,7 @@ function SceneRoot({
       frameId = requestAnimationFrame(renderLoop);
     }
     window.addEventListener('resize', handleResize);
-    renderer.domElement.addEventListener('pointerup', pickNpc);
+    renderer.domElement.addEventListener('pointerup', pickAvatar);
 
     return () => {
       if (usingAnimationLoop && typeof renderer?.setAnimationLoop === 'function') {
@@ -600,7 +631,7 @@ function SceneRoot({
         cancelAnimationFrame(frameId);
       }
       window.removeEventListener('resize', handleResize);
-      renderer?.domElement.removeEventListener('pointerup', pickNpc);
+      renderer?.domElement.removeEventListener('pointerup', pickAvatar);
       detachKeyTracking.detach();
       renderer?.domElement.removeEventListener('mousemove', handleMouseMove);
       if (pointerLockSupported) {
@@ -623,6 +654,9 @@ function SceneRoot({
       scene.remove(cameraRig);
       scene.remove(platform);
       scene.remove(floor);
+      if (mountEl.contains(fpsOverlay)) {
+        mountEl.removeChild(fpsOverlay);
+      }
       if (renderer && mountEl.contains(renderer.domElement)) {
         mountEl.removeChild(renderer.domElement);
       }
@@ -640,7 +674,7 @@ function SceneRoot({
       npcMaterials.forEach((mat) => mat.dispose());
       renderer = null;
     };
-  }, [enableNpcCrowdSim, enableShadows, gltfUrl, lights, loadScene, loaderFactory, mobileLookDeltaRef, mobileMoveRef, onSelectProfile, profileSeed, quality, raycasterFactory, rendererFactory, skipSupportCheck]);
+  }, [enableNpcCrowdSim, enableShadows, gltfUrl, lights, loadScene, loaderFactory, mobileLookDeltaRef, mobileMoveRef, onSelectProfile, playerProfile, profileSeed, quality, raycasterFactory, rendererFactory, skipSupportCheck]);
 
   return (
     <div className="scene-root" ref={mountRef} data-testid="scene-root">

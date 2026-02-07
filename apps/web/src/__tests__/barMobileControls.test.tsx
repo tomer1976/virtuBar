@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MutableRefObject } from 'react';
 import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 import { FeatureFlagsProvider } from '../app/providers/FeatureFlagsProvider';
+import { ProfileProvider } from '../app/providers/ProfileProvider';
 import { SettingsProvider } from '../app/providers/SettingsProvider';
 import BarPage from '../pages/BarPage';
 
@@ -36,11 +37,13 @@ describe('BarPage mobile controls', () => {
       <ErrorNotificationsProvider>
         <FeatureFlagsProvider>
           <SettingsProvider>
-            <MemoryRouter initialEntries={[{ pathname: '/bar/room-1' }]}>
-              <Routes>
-                <Route path="/bar/:roomId" element={<BarPage />} />
-              </Routes>
-            </MemoryRouter>
+            <ProfileProvider>
+              <MemoryRouter initialEntries={[{ pathname: '/bar/room-1' }]}>
+                <Routes>
+                  <Route path="/bar/:roomId" element={<BarPage />} />
+                </Routes>
+              </MemoryRouter>
+            </ProfileProvider>
           </SettingsProvider>
         </FeatureFlagsProvider>
       </ErrorNotificationsProvider>,

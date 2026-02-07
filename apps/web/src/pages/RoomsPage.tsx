@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  createSeededRng,
-  DEFAULT_MOCK_SEED,
-  driftRoomsOccupancy,
-  generateMockData,
-} from '../state/mockDataEngine';
+import { createSeededRng, driftRoomsOccupancy, generateMockData } from '../state/mockDataEngine';
+import { mockEngineConfig } from '../state/mockConfig';
 import {
   filterRoomsByTheme,
   getHottestRoom,
@@ -21,8 +17,8 @@ type RoomsPageProps = {
   enableDrift?: boolean;
 };
 
-function RoomsPage({ seed, driftMs = 4000, enableDrift = true }: RoomsPageProps) {
-  const resolvedSeed = seed ?? DEFAULT_MOCK_SEED;
+function RoomsPage({ seed, driftMs = mockEngineConfig.rooms.driftMs, enableDrift = true }: RoomsPageProps) {
+  const resolvedSeed = seed ?? mockEngineConfig.seed;
   const { rooms: initialRooms } = useMemo(() => generateMockData({ seed: resolvedSeed }), [resolvedSeed]);
   const [rooms, setRooms] = useState(initialRooms);
   const [filter, setFilter] = useState<RoomFilter>('all');

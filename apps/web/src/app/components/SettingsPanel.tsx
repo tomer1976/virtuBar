@@ -52,6 +52,16 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           Invert Y axis
         </label>
 
+        <label htmlFor="low-graphics" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            id="low-graphics"
+            type="checkbox"
+            checked={settings.lowGraphicsMode}
+            onChange={(e) => updateSettings({ lowGraphicsMode: e.target.checked })}
+          />
+          Low graphics mode (disables shadows)
+        </label>
+
         <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '10px' }}>
           <legend style={{ padding: '0 6px' }}>Graphics quality</legend>
           {(['low', 'medium', 'high'] as const).map((quality) => (
@@ -68,7 +78,7 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
                 checked={settings.graphicsQuality === quality}
                 onChange={() => updateSettings({ graphicsQuality: quality })}
               />
-              {quality.charAt(0).toUpperCase() + quality.slice(1)}
+              {quality.charAt(0).toUpperCase() + quality.slice(1)} quality
             </label>
           ))}
         </fieldset>

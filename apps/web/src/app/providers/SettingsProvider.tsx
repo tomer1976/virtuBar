@@ -16,6 +16,7 @@ export type Settings = {
   motionReduction: boolean;
   showJoystick: boolean;
   invertYAxis: boolean;
+  lowGraphicsMode: boolean;
 };
 
 type SettingsContextValue = {
@@ -31,6 +32,7 @@ const defaultSettings: Settings = {
   motionReduction: false,
   showJoystick: true,
   invertYAxis: false,
+  lowGraphicsMode: false,
 };
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);

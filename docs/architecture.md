@@ -179,9 +179,15 @@ Recommendation: **Server-authoritative room state for membership + basic validat
   - join-room flow across services
 
 ## 11. Deployment (Suggested)
-- Docker + Kubernetes
-- Environments:
   - dev, staging, production
-- Secrets:
   - OAuth keys, DB creds, TURN creds
+
+
+## 12. Phase 2 Demo Performance Knobs (Client)
+- Graphics quality (local setting): `high|medium|low` controls pixel ratio and lighting intensities; low also drops shadows.
+- Low graphics mode toggle (local setting): disables shadows regardless of quality and clamps pixel ratio to 1 for stability on low-end devices.
+- NPC crowd sim flag: `VITE_ENABLE_NPC_CROWD_SIM` (default true) disables spawning/chat/stepping when false.
+- Mock scene flag: `VITE_USE_MOCK_3D_SCENE` (default true) can skip GLTF load to compare fallback pad perf.
+- NPC counts by quality: high=22, medium=18, low=12 (see `SceneRoot`), adjust if perf regresses.
+- Chat bubbles overlay: pure DOM overlay; disable NPC sim to remove overlay cost if needed.
 

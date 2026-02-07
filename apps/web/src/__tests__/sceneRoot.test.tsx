@@ -60,4 +60,105 @@ describe('SceneRoot', () => {
     render(<SceneRoot rendererFactory={() => renderer} skipSupportCheck loadScene={false} quality="low" />);
     expect(renderer.shadowMap.enabled).toBe(false);
   });
+
+  it('disables shadows when enableShadows is false', () => {
+    const renderer = createRendererStub();
+    render(
+      <SceneRoot
+        rendererFactory={() => renderer}
+        skipSupportCheck
+        loadScene={false}
+        quality="high"
+        enableShadows={false}
+      />,
+    );
+    expect(renderer.shadowMap.enabled).toBe(false);
+  });
+
+  it('invokes profile selection when an NPC is clicked', () => {
+    const renderer = createRendererStub();
+    const raycaster = {
+      setFromCamera: vi.fn(),
+      intersectObjects: vi.fn(() => [{ object: { userData: { npcIndex: 0 } } }]),
+    } as unknown as THREE.Raycaster;
+    const handleSelect = vi.fn();
+
+    vi.spyOn(renderer.domElement, 'getBoundingClientRect').mockReturnValue({
+      width: 100,
+      height: 100,
+      top: 0,
+      left: 0,
+      bottom: 100,
+      right: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    render(
+      <SceneRoot
+        rendererFactory={() => renderer}
+        skipSupportCheck
+        loadScene={false}
+        raycasterFactory={() => raycaster}
+        onSelectProfile={handleSelect}
+      />,
+    );
+
+    const event = typeof PointerEvent !== 'undefined'
+      ? new PointerEvent('pointerup', { clientX: 10, clientY: 10 })
+      : new MouseEvent('pointerup', { clientX: 10, clientY: 10 });
+    renderer.domElement.dispatchEvent(event as Event);
+
+    expect(handleSelect).toHaveBeenCalled();
+  });
+
+  it('invokes profile selection when the player is clicked', () => {
+    const renderer = createRendererStub();
+    const playerProfile = {
+      id: 'player',
+      displayName: 'You',
+      avatarPreset: 'aurora',
+      sharedInterests: ['mixology'],
+      region: 'Local',
+      affinityScore: 100,
+    };
+    const playerObject = new THREE.Object3D();
+    playerObject.userData.isPlayer = true;
+    const raycaster = {
+      setFromCamera: vi.fn(),
+      intersectObjects: vi.fn(() => [{ object: playerObject }]),
+    } as unknown as THREE.Raycaster;
+    const handleSelect = vi.fn();
+
+    vi.spyOn(renderer.domElement, 'getBoundingClientRect').mockReturnValue({
+      width: 100,
+      height: 100,
+      top: 0,
+      left: 0,
+      bottom: 100,
+      right: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect);
+
+    render(
+      <SceneRoot
+        rendererFactory={() => renderer}
+        skipSupportCheck
+        loadScene={false}
+        raycasterFactory={() => raycaster}
+        onSelectProfile={handleSelect}
+        playerProfile={playerProfile}
+      />,
+    );
+
+    const event = typeof PointerEvent !== 'undefined'
+      ? new PointerEvent('pointerup', { clientX: 10, clientY: 10 })
+      : new MouseEvent('pointerup', { clientX: 10, clientY: 10 });
+    renderer.domElement.dispatchEvent(event as Event);
+
+    expect(handleSelect).toHaveBeenCalledWith(playerProfile);
+  });
 });

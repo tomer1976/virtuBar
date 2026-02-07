@@ -7,6 +7,8 @@ const featureFlagKeys = [
   'USE_MOCK_REALTIME',
   'USE_MOCK_VOICE',
   'USE_MOCK_LIVENESS',
+  'USE_MOCK_3D_SCENE',
+  'ENABLE_NPC_CROWD_SIM',
 ] as const;
 
 export type FeatureFlagKey = (typeof featureFlagKeys)[number];
@@ -19,6 +21,8 @@ const defaultFeatureFlags: FeatureFlags = {
   USE_MOCK_REALTIME: true,
   USE_MOCK_VOICE: true,
   USE_MOCK_LIVENESS: true,
+  USE_MOCK_3D_SCENE: true,
+  ENABLE_NPC_CROWD_SIM: true,
 };
 
 function toBoolean(raw: unknown): boolean {

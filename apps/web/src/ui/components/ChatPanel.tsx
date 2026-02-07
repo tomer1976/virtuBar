@@ -7,7 +7,8 @@ import {
   generateChatThread,
   injectIncomingMessage,
 } from '../../state/mockChat';
-import { createSeededRng, DEFAULT_MOCK_SEED } from '../../state/mockDataEngine';
+import { createSeededRng } from '../../state/mockDataEngine';
+import { mockEngineConfig } from '../../state/mockConfig';
 
 export type ChatPanelProps = {
   seed?: string | number;
@@ -19,15 +20,16 @@ export type ChatPanelProps = {
 
 function ChatPanel({
   seed,
-  initialCount = 6,
-  tickMs = 5000,
-  maxMessages = 30,
+  initialCount = mockEngineConfig.chat.initialCount,
+  tickMs = mockEngineConfig.chat.tickMs,
+  maxMessages = mockEngineConfig.chat.maxMessages,
   enableLiveness = true,
 }: ChatPanelProps) {
-  const authorPool = useMemo(() => buildChatAuthorPool(seed ?? DEFAULT_MOCK_SEED), [seed]);
+  const resolvedSeed = seed ?? mockEngineConfig.seed;
+  const authorPool = useMemo(() => buildChatAuthorPool(resolvedSeed), [resolvedSeed]);
   const initialThread = useMemo(
-    () => generateChatThread({ seed: seed ?? DEFAULT_MOCK_SEED, count: initialCount, authorPool }),
-    [seed, initialCount, authorPool],
+    () => generateChatThread({ seed: resolvedSeed, count: initialCount, authorPool }),
+    [resolvedSeed, initialCount, authorPool],
   );
   const [messages, setMessages] = useState(initialThread);
   const [draft, setDraft] = useState('');
@@ -38,8 +40,8 @@ function ChatPanel({
   }, [initialThread]);
 
   useEffect(() => {
-    rngRef.current = createSeededRng(`${seed ?? DEFAULT_MOCK_SEED}-chat-drift`);
-  }, [seed]);
+    rngRef.current = createSeededRng(`${resolvedSeed}-chat-drift`);
+  }, [resolvedSeed]);
 
   useEffect(() => {
     if (!enableLiveness) return undefined;

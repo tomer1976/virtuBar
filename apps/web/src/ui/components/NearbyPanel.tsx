@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, ProfileCardOverlay } from '.';
-import {
-  driftNearbyUsers,
-  generateNearbyUsers,
-  NearbyOptions,
-  sortNearby,
-} from '../../state/mockNearby';
+import { driftNearbyUsers, generateNearbyUsers, NearbyOptions, sortNearby } from '../../state/mockNearby';
 import { createSeededRng } from '../../state/mockDataEngine';
+import { mockEngineConfig } from '../../state/mockConfig';
 import { useFeatureFlags } from '../../app/providers/FeatureFlagsProvider';
 
 type NearbyPanelProps = NearbyOptions & {
   tickMs?: number;
 };
 
-function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
-  const initial = useMemo(() => sortNearby(generateNearbyUsers({ seed, count })), [seed, count]);
+function NearbyPanel({ seed, count = mockEngineConfig.nearby.count, tickMs = mockEngineConfig.nearby.tickMs }: NearbyPanelProps) {
+  const resolvedSeed = seed ?? mockEngineConfig.seed;
+  const initial = useMemo(
+    () => sortNearby(generateNearbyUsers({ seed: resolvedSeed, count })),
+    [resolvedSeed, count],
+  );
   const [nearby, setNearby] = useState(initial);
   const rngRef = useRef<() => number>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -32,8 +32,8 @@ function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
   }, [initial]);
 
   useEffect(() => {
-    rngRef.current = createSeededRng(`${seed ?? 'nearby'}-drift`);
-  }, [seed]);
+    rngRef.current = createSeededRng(`${resolvedSeed}-nearby-drift`);
+  }, [resolvedSeed]);
 
   useEffect(() => {
     if (!flags.USE_MOCK_LIVENESS) return undefined;
@@ -87,7 +87,7 @@ function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
         </div>
         <Button
           variant="ghost"
-          onClick={() => setNearby(sortNearby(generateNearbyUsers({ seed, count })))}
+          onClick={() => setNearby(sortNearby(generateNearbyUsers({ seed: resolvedSeed, count })))}
           type="button"
         >
           Refresh list

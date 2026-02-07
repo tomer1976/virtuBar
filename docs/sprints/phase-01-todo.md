@@ -59,7 +59,9 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 ## Cleanup & Refactor
 - [x] Remove any unused placeholder components from Phase 0 replaced by finalized UI.
 	- Removed the Ui Kit sample page/route and its test; navigation cleaned up accordingly.
-- [ ] Ensure mock engines are configurable and isolated for later replacement (Phase 4+ backend, Phase 3 realtime sim).
+- [x] Ensure mock engines are configurable and isolated for later replacement (Phase 4+ backend, Phase 3 realtime sim).
+	- Centralized mock seeds and liveness intervals in mockEngineConfig with coverage to ensure Rooms/Nearby/Chat honor shared defaults.
 
 ## Handoff to Next Phase
-- [ ] Record acceptance validation and demo checklist outcomes; confirm readiness for Phase 2 (3D venue MVP) with clear mock interfaces ready to swap.
+- [x] Record acceptance validation and demo checklist outcomes; confirm readiness for Phase 2 (3D venue MVP) with clear mock interfaces ready to swap.
+	- Acceptance recorded: lint/typecheck/test suite pass; manual demo run covers onboarding → rooms → hottest room CTA → HUD safety/chat overlays; mock interfaces/seeds centralized for future backend/realtime swap.

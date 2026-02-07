@@ -56,7 +56,7 @@ describe('SettingsPanel', () => {
 
     const mute = screen.getByLabelText(/Mute audio/i) as HTMLInputElement;
     const motion = screen.getByLabelText(/Reduce motion/i) as HTMLInputElement;
-    const low = screen.getByLabelText(/Low/i) as HTMLInputElement;
+    const low = screen.getByLabelText(/Low quality/i) as HTMLInputElement;
 
     fireEvent.click(mute);
     fireEvent.click(motion);
@@ -71,6 +71,13 @@ describe('SettingsPanel', () => {
     renderPanel();
     expect(screen.getByLabelText(/Mute audio/i)).toBeChecked();
     expect(screen.getByLabelText(/Reduce motion/i)).toBeChecked();
-    expect(screen.getByLabelText(/Low/i)).toBeChecked();
+    expect(screen.getByLabelText(/Low quality/i)).toBeChecked();
+  });
+
+  it('toggles low graphics mode', () => {
+    renderPanel();
+    const toggle = screen.getByLabelText(/Low graphics mode/i) as HTMLInputElement;
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
   });
 });
