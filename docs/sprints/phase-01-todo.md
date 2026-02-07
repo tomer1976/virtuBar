@@ -12,7 +12,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Added seeded generator producing deterministic rooms/users with balanced occupancy and shared default seed for repeatable demos.
 - [x] Add simulated occupancy drift over time for rooms; ensure UI updates without page reload.
 	- Seeded interval-driven occupancy drift updates room cards live with deterministic RNG.
-- [ ] Implement nearby users panel with distance-sorted list fed by simulated movement/proximity updates.
+- [x] Implement nearby users panel with distance-sorted list fed by simulated movement/proximity updates.
+	- Added seeded nearby panel with periodic drift, distance sorting, and shared interest context.
 - [ ] Add mock local chat panel that supports sending messages, shows timestamps, and periodically injects simulated incoming messages.
 - [ ] Implement profile card overlay showing display name, interest tags, shared-interest highlighting; accessible from nearby list and avatar taps/clicks.
 - [ ] Add safety actions (mute/block/report) in UI; update mock state to reflect badges/visibility changes immediately.

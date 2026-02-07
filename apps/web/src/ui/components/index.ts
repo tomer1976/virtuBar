@@ -5,3 +5,4 @@ export { default as Drawer } from './Drawer';
 export { default as Toast } from './Toast';
 export { default as AvatarBadge } from './AvatarBadge';
 export { default as TagChip } from './TagChip';
+export { default as NearbyPanel } from './NearbyPanel';

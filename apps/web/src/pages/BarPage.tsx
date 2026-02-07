@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import NearbyPanel from '../ui/components/NearbyPanel';
 
 function BarPage() {
   const { roomId } = useParams();
@@ -11,6 +12,10 @@ function BarPage() {
         <div className="route-chip">Room ID: {roomId ?? 'unknown'}</div>
         <div className="route-chip">Stage for future 3D scene</div>
         <div className="route-chip">Voice toggle (mock)</div>
+      </div>
+
+      <div style={{ marginTop: '16px' }}>
+        <NearbyPanel seed={roomId ?? undefined} />
       </div>
     </section>
   );
