@@ -4,7 +4,8 @@
 Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liveness, keeping the experience backend-free while enabling realistic demos on desktop and mobile.
 
 ## Frontend Tasks
-- [ ] Implement onboarding wizard (4 steps) with validation: display name + optional age gate UI, avatar preset picker, interest tag picker enforcing minimum 5 selections, audio setup UI simulation with mocked permission prompts.
+- [x] Implement onboarding wizard (4 steps) with validation: display name + optional age gate UI, avatar preset picker, interest tag picker enforcing minimum 5 selections, audio setup UI simulation with mocked permission prompts.
+	- Done with age gate confirmation, min-5 interest enforcement, and mocked mic permission + audio readiness persisted to profile storage.
 - [ ] Build room list UI with theme filters, occupancy display, and “Join hottest room” CTA; wire to mock rooms dataset.
 - [ ] Implement mock data engine to generate 5–15 rooms and 20–60 fake users with seeded randomness for repeatable demos.
 - [ ] Add simulated occupancy drift over time for rooms; ensure UI updates without page reload.

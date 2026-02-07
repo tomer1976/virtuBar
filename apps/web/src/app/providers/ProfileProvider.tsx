@@ -14,6 +14,8 @@ export type MockProfile = {
   displayName: string;
   avatarPreset: string;
   interests: string[];
+  ageConfirmed: boolean;
+  audioPermission: 'idle' | 'prompting' | 'granted' | 'denied';
   audioReady: boolean;
 };
 
@@ -28,6 +30,8 @@ const defaultProfile: MockProfile = {
   displayName: 'Guest Mixer',
   avatarPreset: 'aurora',
   interests: [],
+  ageConfirmed: false,
+  audioPermission: 'idle',
   audioReady: false,
 };
 
