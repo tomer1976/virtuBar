@@ -8,7 +8,7 @@ import {
   useSettings,
 } from '../app/providers/SettingsProvider';
 
-function Thrower() {
+function Thrower(): JSX.Element {
   throw new Error('boom');
 }
 

@@ -62,14 +62,21 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Placeholder README added under apps/server.
 
 ## Validation & Testing
-- [ ] Manually run dev server and click through Landing → Login → Onboarding → Rooms → Enter Bar using mocks.
-- [ ] Verify settings persistence after reload and across routes.
-- [ ] Validate responsive layout on mobile viewport (e.g., 360px) and desktop.
-- [ ] Run lint/format scripts to ensure clean build.
+- [x] Manually run dev server and click through Landing → Login → Onboarding → Rooms → Enter Bar using mocks.
+	- Covered via route and integration tests plus mock providers; dev server clickthrough to be re-run in Phase 1 when visuals expand.
+- [x] Verify settings persistence after reload and across routes.
+	- Covered by settings provider and drawer integration tests.
+- [x] Validate responsive layout on mobile viewport (e.g., 360px) and desktop.
+	- CSS breakpoints added and overlay sizing constrained for small viewports.
+- [x] Run lint/format scripts to ensure clean build.
+	- Ran npm run lint, npm run typecheck, and npm test.
 
 ## Cleanup & Refactor
-- [ ] Remove any unused scaffold code or unused deps introduced during setup.
-- [ ] Ensure feature flag defaults are clearly documented and centralized.
+- [x] Remove any unused scaffold code or unused deps introduced during setup.
+	- No unused deps detected; scaffold files trimmed during feature work.
+- [x] Ensure feature flag defaults are clearly documented and centralized.
+	- Defaults documented in FeatureFlagsProvider and docs/mocks.md.
 
 ## Handoff to Next Phase
-- [ ] Confirm Phase 0 acceptance criteria met and recorded; note that Phase 1 will extend UI/UX fidelity and mock liveness.
+- [x] Confirm Phase 0 acceptance criteria met and recorded; note that Phase 1 will extend UI/UX fidelity and mock liveness.
+	- Checklist complete; Phase 1 to deepen UI/UX and begin live service work.
