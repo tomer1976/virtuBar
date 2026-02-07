@@ -4,7 +4,8 @@
 Integrate a 3D bar scene with player avatar rendering, desktop/mobile controls, NPC crowd simulation, and mock chat bubbles, all client-only with performance tuned for demo targets.
 
 ## Frontend Tasks
-- [ ] Integrate Three.js or Babylon.js renderer into `apps/web/src/three` with scene root component.
+- [x] Integrate Three.js or Babylon.js renderer into `apps/web/src/three` with scene root component.
+	- Completed: Added Three.js-based `SceneRoot` with fallback-safe mount, styling, and unit tests.
 - [ ] Load GLTF bar scene from `public/models`; add fallback ground plane if asset load fails.
 - [ ] Implement lighting preset (key/fill/ambient) tuned for performance; add shadow toggle for low/med quality modes.
 - [ ] Implement player avatar rendering with idle/walk animations; hook to input-driven velocity.
