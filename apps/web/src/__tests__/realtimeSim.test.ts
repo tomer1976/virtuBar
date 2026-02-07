@@ -179,4 +179,62 @@ describe('SimRealtimeProvider', () => {
     await providerB.sendChat({ roomId: 'room-reconnect', text: 'welcome back', mode: 'local' });
     expect(chatEventsA.events[chatEventsA.events.length - 1]?.payload.text).toBe('welcome back');
   });
+
+  it('allows two clients to see each other move and chat', async () => {
+    const providerA = createSimProvider();
+    const providerB = createSimProvider();
+
+    await providerA.connect();
+    await providerB.connect();
+
+    const transformsForA = collectEvents('avatar_transform_broadcast');
+    const transformsForB = collectEvents('avatar_transform_broadcast');
+    const chatsForA = collectEvents('chat_broadcast');
+    const chatsForB = collectEvents('chat_broadcast');
+    providerA.on(transformsForA.eventName, transformsForA.handler);
+    providerB.on(transformsForB.eventName, transformsForB.handler);
+    providerA.on(chatsForA.eventName, chatsForA.handler);
+    providerB.on(chatsForB.eventName, chatsForB.handler);
+
+    await providerA.joinRoom({
+      roomId: 'room-mutual',
+      deviceType: 'desktop',
+      user: { userId: 'user-a', displayName: 'A', avatarId: 'ava' },
+    });
+    await providerB.joinRoom({
+      roomId: 'room-mutual',
+      deviceType: 'desktop',
+      user: { userId: 'user-b', displayName: 'B', avatarId: 'avb' },
+    });
+
+    await providerA.sendTransform({
+      roomId: 'room-mutual',
+      seq: 1,
+      x: 1,
+      y: 0,
+      z: 1,
+      rotY: 0,
+      anim: 'walk',
+      speaking: false,
+    });
+    await providerB.sendTransform({
+      roomId: 'room-mutual',
+      seq: 1,
+      x: -1,
+      y: 0,
+      z: -1,
+      rotY: Math.PI,
+      anim: 'walk',
+      speaking: true,
+    });
+
+    expect(transformsForA.events.some((event) => event.payload.userId === 'user-b')).toBe(true);
+    expect(transformsForB.events.some((event) => event.payload.userId === 'user-a')).toBe(true);
+
+    await providerA.sendChat({ roomId: 'room-mutual', text: 'hi from A', mode: 'local' });
+    await providerB.sendChat({ roomId: 'room-mutual', text: 'hi from B', mode: 'local' });
+
+    expect(chatsForA.events.some((event) => event.payload.userId === 'user-b' && event.payload.text === 'hi from B')).toBe(true);
+    expect(chatsForB.events.some((event) => event.payload.userId === 'user-a' && event.payload.text === 'hi from A')).toBe(true);
+  });
 });
