@@ -28,4 +28,21 @@ describe('Safety actions in nearby panel', () => {
     const remaining = screen.getAllByTestId(/nearby-/);
     expect(remaining.length).toBe(initialCards.length - 1);
   });
+
+  it('reports a user, shows badge, and keeps state when reopening overlay', () => {
+    render(<NearbyPanel seed="safety-report" tickMs={10_000} count={3} />);
+
+    const firstCard = screen.getByTestId('nearby-0');
+    fireEvent.click(firstCard);
+
+    fireEvent.click(screen.getByRole('button', { name: /report user/i }));
+    expect(within(firstCard).getByText(/Reported/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Close/i }));
+    expect(screen.queryByRole('dialog', { name: /Profile/i })).not.toBeInTheDocument();
+
+    fireEvent.click(firstCard);
+    expect(screen.getByRole('dialog', { name: /Profile/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Report user/i }).textContent).toMatch(/Reported/i);
+  });
 });

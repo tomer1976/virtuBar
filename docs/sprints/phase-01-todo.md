@@ -49,7 +49,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Covered by onboarding test ensuring messaging updates and continue is disabled until 5 tags are selected.
 - [x] Verify nearby list updates over time and profile card opens reliably from list and avatar interactions.
 	- Added test to advance liveness ticks and confirm ordering changes; overlay still opens and closes after drift.
-- [ ] Check mute/block/report updates UI state immediately and persists in mock session.
+- [x] Check mute/block/report updates UI state immediately and persists in mock session.
+	- Added safety test covering report badge persistence after closing/reopening overlay.
 - [ ] Confirm settings persistence across reloads.
 - [ ] Test mobile viewport (e.g., 360px wide) for joystick UI presence and layout stability.
 
