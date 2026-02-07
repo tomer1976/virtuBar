@@ -52,6 +52,6 @@ describe('Error handling', () => {
       </ErrorNotificationsProvider>,
     );
 
-    expect(await screen.findByText(/Settings data could not be loaded/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Data could not be loaded; defaults restored/i)).toBeInTheDocument();
   });
 });

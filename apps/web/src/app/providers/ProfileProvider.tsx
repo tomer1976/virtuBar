@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { useFeatureFlags } from './FeatureFlagsProvider';
 import { useErrorNotifications } from './ErrorNotificationsProvider';
+import { clearStorageKey, readJsonWithDefaults, writeJsonSafe } from '../utils/storage';
 
 export type MockProfile = {
   displayName: string;
@@ -38,29 +39,13 @@ const defaultProfile: MockProfile = {
 const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
 
 function readStoredProfile(onError?: (message: string) => void): MockProfile | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as MockProfile;
-    if (parsed && typeof parsed.displayName === 'string') {
-      return { ...defaultProfile, ...parsed };
-    }
-  } catch (error) {
-    onError?.('Profile data could not be loaded; defaults restored.');
-    console.warn('Failed to parse stored mock profile', error);
-  }
+  const merged = readJsonWithDefaults<MockProfile>(STORAGE_KEY, defaultProfile, onError);
+  if (merged.displayName) return merged;
   return null;
 }
 
 function writeStoredProfile(profile: MockProfile, onError?: (message: string) => void) {
-  if (typeof window === 'undefined') return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
-  } catch (error) {
-    onError?.('Profile changes could not be saved.');
-    console.warn('Failed to write mock profile', error);
-  }
+  writeJsonSafe(STORAGE_KEY, profile, onError);
 }
 
 export function ProfileProvider({ children }: PropsWithChildren) {
@@ -91,13 +76,8 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
   const resetProfile = useCallback(() => {
     setProfile(defaultProfile);
-    if (flags.USE_MOCK_PROFILE && typeof window !== 'undefined') {
-      try {
-        window.localStorage.removeItem(STORAGE_KEY);
-      } catch (error) {
-        notifyError('Profile could not be cleared.');
-        console.warn('Failed to clear profile', error);
-      }
+    if (flags.USE_MOCK_PROFILE) {
+      clearStorageKey(STORAGE_KEY, notifyError);
     }
   }, [flags.USE_MOCK_PROFILE, notifyError]);
 

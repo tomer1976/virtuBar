@@ -8,9 +8,22 @@ import {
   generateMockData,
 } from '../state/mockDataEngine';
 import { getHottestRoom, mockRoomFilters } from '../state/mockRooms';
+import { ErrorNotificationsProvider } from '../app/providers/ErrorNotificationsProvider';
 
 function renderPage() {
-  return render(<RoomsPage />);
+  return render(
+    <ErrorNotificationsProvider>
+      <RoomsPage />
+    </ErrorNotificationsProvider>,
+  );
+}
+
+function renderPageWithProps(props: Partial<Parameters<typeof RoomsPage>[0]> = {}) {
+  return render(
+    <ErrorNotificationsProvider>
+      <RoomsPage {...props} />
+    </ErrorNotificationsProvider>,
+  );
 }
 
 describe('RoomsPage', () => {
@@ -57,7 +70,7 @@ describe('RoomsPage', () => {
     vi.useFakeTimers();
     const seed = 'drift-seed';
     const { rooms } = generateMockData({ seed });
-    render(<RoomsPage seed={seed} driftMs={20} enableDrift />);
+    renderPageWithProps({ seed, driftMs: 20, enableDrift: true });
 
     const list = screen.getByLabelText(/Room list/i);
     const firstRoom = rooms[0];
@@ -73,6 +86,28 @@ describe('RoomsPage', () => {
     const updatedCard = within(list).getByText(firstRoom.name).closest('.route-chip') as HTMLElement;
     expect(updatedCard).toBeTruthy();
     expect(within(updatedCard).getByText(new RegExp(`${expectedRooms[0].occupants} online`))).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('shows error and recovers via retry', () => {
+    vi.useFakeTimers();
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /Simulate failure/i }));
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(screen.getByTestId('rooms-error')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Retry/i }));
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(screen.getByLabelText(/Room list/i)).toBeInTheDocument();
     vi.useRealTimers();
   });
 });

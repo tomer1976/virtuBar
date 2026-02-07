@@ -30,4 +30,24 @@ describe('SettingsPanel', () => {
     fireEvent.click(screen.getByLabelText(/Medium/i));
     expect(screen.getByLabelText(/Medium/i)).toBeChecked();
   });
+
+  it('persists control toggles across reload', () => {
+    const { unmount } = renderPanel();
+
+    const joystick = screen.getByLabelText(/Show joystick overlay/i) as HTMLInputElement;
+    const invert = screen.getByLabelText(/Invert Y axis/i) as HTMLInputElement;
+
+    const nextJoystick = !joystick.checked;
+    fireEvent.click(joystick);
+    fireEvent.click(invert);
+
+    expect((screen.getByLabelText(/Show joystick overlay/i) as HTMLInputElement).checked).toBe(nextJoystick);
+    expect(screen.getByLabelText(/Invert Y axis/i)).toBeChecked();
+
+    unmount();
+
+    renderPanel();
+    expect((screen.getByLabelText(/Show joystick overlay/i) as HTMLInputElement).checked).toBe(nextJoystick);
+    expect(screen.getByLabelText(/Invert Y axis/i)).toBeChecked();
+  });
 });

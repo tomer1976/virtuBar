@@ -32,6 +32,26 @@ function SettingsPanel({ open, onClose }: SettingsPanelProps) {
           Reduce motion
         </label>
 
+        <label htmlFor="show-joystick" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            id="show-joystick"
+            type="checkbox"
+            checked={settings.showJoystick}
+            onChange={(e) => updateSettings({ showJoystick: e.target.checked })}
+          />
+          Show joystick overlay (mobile)
+        </label>
+
+        <label htmlFor="invert-y" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <input
+            id="invert-y"
+            type="checkbox"
+            checked={settings.invertYAxis}
+            onChange={(e) => updateSettings({ invertYAxis: e.target.checked })}
+          />
+          Invert Y axis
+        </label>
+
         <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '10px' }}>
           <legend style={{ padding: '0 6px' }}>Graphics quality</legend>
           {(['low', 'medium', 'high'] as const).map((quality) => (

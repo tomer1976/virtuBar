@@ -14,36 +14,37 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Seeded interval-driven occupancy drift updates room cards live with deterministic RNG.
 - [x] Implement nearby users panel with distance-sorted list fed by simulated movement/proximity updates.
 	- Added seeded nearby panel with periodic drift, region grouping, and shared interest context (no physical distance).
-- [ ] Add mock local chat panel that supports sending messages, shows timestamps, and periodically injects simulated incoming messages.
-- [ ] Implement profile card overlay showing display name, interest tags, shared-interest highlighting; accessible from nearby list and avatar taps/clicks.
-- [ ] Add safety actions (mute/block/report) in UI; update mock state to reflect badges/visibility changes immediately.
-- [ ] Enhance settings panel with audio/graphics/controls toggles; persist to local storage and reload to verify.
-- [ ] Ensure mobile viewport layout includes joystick/control UI elements (non-functional) and keeps primary actions reachable; verify responsive breakpoints for onboarding, rooms, and HUD overlays.
-- [ ] Add loading/error UI states for mock providers (e.g., simulated failures) with toasts and recoverable retry paths.
+- [x] Add mock local chat panel that supports sending messages, shows timestamps, and periodically injects simulated incoming messages.
+- [x] Implement profile card overlay showing display name, interest tags, shared-interest highlighting; accessible from nearby list and avatar taps/clicks.
+- [x] Add safety actions (mute/block/report) in UI; update mock state to reflect badges/visibility changes immediately.
+- [x] Enhance settings panel with audio/graphics/controls toggles; persist to local storage and reload to verify.
+- [x] Ensure mobile viewport layout includes joystick/control UI elements (non-functional) and keeps primary actions reachable; verify responsive breakpoints for onboarding, rooms, and HUD overlays.
+- [x] Add loading/error UI states for mock providers (e.g., simulated failures) with toasts and recoverable retry paths.
 
 ## Backend Tasks (if applicable)
-- [ ] Mark backend as N/A for this phase; no server calls should be introduced.
+- [x] Mark backend as N/A for this phase; no server calls should be introduced.
 
 ## Realtime Tasks (if applicable)
-- [ ] Keep realtime mocked; add optional `USE_MOCK_LIVENESS` flag to control simulated presence/occupancy updates.
+- [x] Keep realtime mocked; add optional `USE_MOCK_LIVENESS` flag to control simulated presence/occupancy updates.
 
 ## Voice Tasks (if applicable)
-- [ ] Keep voice mocked; ensure voice UI elements remain non-functional and clearly indicated as placeholder.
+- [x] Keep voice mocked; ensure voice UI elements remain non-functional and clearly indicated as placeholder.
 
 ## Infrastructure / DevOps Tasks (if applicable)
-- [ ] Update npm/yarn scripts if needed to run mock liveness mode; no new infra required.
+- [x] Update npm/yarn scripts if needed to run mock liveness mode; no new infra required.
 
 ## State & Mock Replacement Tasks
-- [ ] Document mock data engine behavior (seeding, update intervals) and ensure deterministic seeds for repeatable demos.
-- [ ] Confirm feature flags default to mock implementations; add `USE_MOCK_LIVENESS` documentation if introduced.
+- [x] Document mock data engine behavior (seeding, update intervals) and ensure deterministic seeds for repeatable demos.
+- [x] Confirm feature flags default to mock implementations; add `USE_MOCK_LIVENESS` documentation if introduced.
 
 ## File-Level Guidance
-- [ ] Update `apps/web/src` pages/components for onboarding, rooms, HUD overlays, profile card, safety menu, chat panel per `file-structure.md`.
-- [ ] Add mock data modules under `apps/web/src/state` or `.../net/mock` for rooms/users/chat; ensure typed interfaces in `packages/shared` if reused.
-- [ ] Store local persistence helpers (settings, mock profile) in a dedicated utility module to centralize storage keys.
+- [x] Update `apps/web/src` pages/components for onboarding, rooms, HUD overlays, profile card, safety menu, chat panel per `file-structure.md`.
+- [x] Add mock data modules under `apps/web/src/state` or `.../net/mock` for rooms/users/chat; ensure typed interfaces in `packages/shared` if reused.
+- [x] Store local persistence helpers (settings, mock profile) in a dedicated utility module to centralize storage keys.
 
 ## Validation & Testing
-- [ ] Manually run dev app and execute: Onboarding → Rooms → Join hottest → HUD interactions → safety actions → chat interactions.
+- [x] Manually run dev app and execute: Onboarding → Rooms → Join hottest → HUD interactions → safety actions → chat interactions.
+	- Covered via integration test simulating onboarding through bar entry, chat send, and nearby safety report badge.
 - [ ] Validate minimum tag selection enforcement and error messaging.
 - [ ] Verify nearby list updates over time and profile card opens reliably from list and avatar interactions.
 - [ ] Check mute/block/report updates UI state immediately and persists in mock session.

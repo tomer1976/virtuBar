@@ -5,4 +5,7 @@ export { default as Drawer } from './Drawer';
 export { default as Toast } from './Toast';
 export { default as AvatarBadge } from './AvatarBadge';
 export { default as TagChip } from './TagChip';
+export { default as ChatPanel } from './ChatPanel';
+export { default as ProfileCardOverlay } from './ProfileCardOverlay';
 export { default as NearbyPanel } from './NearbyPanel';
+export { default as JoystickOverlay } from './JoystickOverlay';

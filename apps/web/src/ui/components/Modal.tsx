@@ -12,7 +12,12 @@ function Modal({ open, title, onClose, children }: ModalProps) {
   if (!open) return null;
 
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
+    <div
+      className="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title ?? 'Modal'}
+    >
       <div className="modal">
         {title ? <h3 className="page-title">{title}</h3> : null}
         <div>{children}</div>

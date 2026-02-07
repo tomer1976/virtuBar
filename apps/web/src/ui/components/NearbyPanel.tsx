@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button } from '.';
+import { Button, ProfileCardOverlay } from '.';
 import {
   driftNearbyUsers,
   generateNearbyUsers,
@@ -7,6 +7,7 @@ import {
   sortNearby,
 } from '../../state/mockNearby';
 import { createSeededRng } from '../../state/mockDataEngine';
+import { useFeatureFlags } from '../../app/providers/FeatureFlagsProvider';
 
 type NearbyPanelProps = NearbyOptions & {
   tickMs?: number;
@@ -16,9 +17,18 @@ function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
   const initial = useMemo(() => sortNearby(generateNearbyUsers({ seed, count })), [seed, count]);
   const [nearby, setNearby] = useState(initial);
   const rngRef = useRef<() => number>();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mutedIds, setMutedIds] = useState<Set<string>>(new Set());
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
+  const flags = useFeatureFlags();
 
   useEffect(() => {
     setNearby(initial);
+    setSelectedId(null);
+    setMutedIds(new Set());
+    setBlockedIds(new Set());
+    setReportedIds(new Set());
   }, [initial]);
 
   useEffect(() => {
@@ -26,11 +36,45 @@ function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
   }, [seed]);
 
   useEffect(() => {
+    if (!flags.USE_MOCK_LIVENESS) return undefined;
     const id = window.setInterval(() => {
       setNearby((prev) => sortNearby(driftNearbyUsers(prev, rngRef.current ?? (() => Math.random()))));
     }, tickMs);
     return () => window.clearInterval(id);
-  }, [tickMs]);
+  }, [tickMs, flags.USE_MOCK_LIVENESS]);
+
+  const displayedNearby = useMemo(
+    () => nearby.filter((user) => !blockedIds.has(user.id)),
+    [blockedIds, nearby],
+  );
+
+  const handleToggleMute = (id: string) => {
+    setMutedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleToggleBlock = (id: string) => {
+    setBlockedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+    setSelectedId((current) => (current === id ? null : current));
+  };
+
+  const handleToggleReport = (id: string) => {
+    setReportedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <div className="panel" aria-label="Nearby users" style={{ display: 'grid', gap: '12px' }}>
@@ -50,8 +94,16 @@ function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
         </Button>
       </div>
       <div className="route-grid" aria-label="Nearby list">
-        {nearby.map((user, idx) => (
-          <div key={user.id} className="route-chip" data-testid={`nearby-${idx}`} style={{ textAlign: 'left' }}>
+        {displayedNearby.map((user, idx) => (
+          <button
+            key={user.id}
+            className="route-chip"
+            data-testid={`nearby-${idx}`}
+            style={{ textAlign: 'left', cursor: 'pointer' }}
+            onClick={() => setSelectedId(user.id)}
+            type="button"
+            aria-label={`Open profile for ${user.displayName}`}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontWeight: 600 }}>{user.displayName}</span>
               <span className="badge" aria-label={`Region ${user.region}`}>
@@ -71,10 +123,24 @@ function NearbyPanel({ seed, count = 8, tickMs = 3500 }: NearbyPanelProps) {
               <span className="badge" aria-label="Rank">
                 #{idx + 1}
               </span>
+              {mutedIds.has(user.id) ? <span className="badge">Muted</span> : null}
+              {reportedIds.has(user.id) ? <span className="badge">Reported</span> : null}
             </div>
-          </div>
+          </button>
         ))}
       </div>
+
+      <ProfileCardOverlay
+        open={Boolean(selectedId)}
+        user={nearby.find((item) => item.id === selectedId) ?? null}
+        muted={selectedId ? mutedIds.has(selectedId) : false}
+        blocked={selectedId ? blockedIds.has(selectedId) : false}
+        reported={selectedId ? reportedIds.has(selectedId) : false}
+        onToggleMute={handleToggleMute}
+        onToggleBlock={handleToggleBlock}
+        onToggleReport={handleToggleReport}
+        onClose={() => setSelectedId(null)}
+      />
     </div>
   );
 }
