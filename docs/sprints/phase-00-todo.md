@@ -18,7 +18,8 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Added ProfileProvider with localStorage persistence, profile reset/update APIs, and tests; wrapped app tree for access.
 - [x] Implement onboarding wizard screens (display name, avatar preset, interest tags, audio setup UI simulation) using mock providers.
 	- Built interactive onboarding flow that saves profile fields across steps with mocked audio readiness and persists to storage.
-- [ ] Implement rooms screen using mock rooms dataset; include “Join hottest room” CTA that routes to a selected room ID.
+- [x] Implement rooms screen using mock rooms dataset; include “Join hottest room” CTA that routes to a selected room ID.
+	- Added deterministic mock rooms list with CTA linking to hottest room and tests covering list rendering and CTA target.
 - [ ] Implement shell layout with settings panel; persist settings locally (e.g., audio/graphics/controls toggles) and reload to verify persistence.
 - [ ] Add responsive styles for mobile (≥360px) and desktop breakpoints; verify layout for navigation and overlays.
 - [ ] Add global error toast/fallback handling for mock provider failures.
