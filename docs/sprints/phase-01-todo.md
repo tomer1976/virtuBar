@@ -57,7 +57,8 @@ Complete all VirtuBar UI/UX flows with high-fidelity mock data and simulated liv
 	- Covered by joystick overlay test asserting HUD controls and action badges render when visible.
 
 ## Cleanup & Refactor
-- [ ] Remove any unused placeholder components from Phase 0 replaced by finalized UI.
+- [x] Remove any unused placeholder components from Phase 0 replaced by finalized UI.
+	- Removed the Ui Kit sample page/route and its test; navigation cleaned up accordingly.
 - [ ] Ensure mock engines are configurable and isolated for later replacement (Phase 4+ backend, Phase 3 realtime sim).
 
 ## Handoff to Next Phase
