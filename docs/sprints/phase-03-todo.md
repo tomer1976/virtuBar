@@ -60,6 +60,8 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 - [x] Test reconnect: force disconnect and reconnect, ensuring room state rehydrates.
 	- Covered via reconnect simulation test ensuring room_state replay and resumed chat (realtimeSim.test.ts).
 - [ ] Verify smoothing produces stable, non-jittery motion at normal update rates.
+- [x] Verify smoothing produces stable, non-jittery motion at normal update rates.
+	- Added smoothing stability test covering monotonic interpolation at normal update cadence (transformSmoother.test.ts).
 
 ## Cleanup & Refactor
 - [ ] Remove any ad-hoc mock movement code superseded by the simulation provider.

@@ -52,4 +52,19 @@ describe('TransformSmoother', () => {
     const smoothed = smoother.getSmoothed(70);
     expect(smoothed?.x).toBe(2);
   });
+
+  it('produces smooth, monotonic motion at normal update rates', () => {
+    const smoother = new TransformSmoother({ bufferMs: 100, snapDistance: 10 });
+    smoother.ingestSample({ ...baseSample, seq: 1, x: 0, ts: 0 });
+    smoother.ingestSample({ ...baseSample, seq: 2, x: 1, ts: 50 });
+    smoother.ingestSample({ ...baseSample, seq: 3, x: 2, ts: 100 });
+    smoother.ingestSample({ ...baseSample, seq: 4, x: 3, ts: 150 });
+
+    const smoothedEarly = smoother.getSmoothed(200); // target time 100
+    const smoothedLater = smoother.getSmoothed(220); // target time 120
+
+    expect(smoothedEarly?.x).toBeCloseTo(2, 2);
+    expect(smoothedLater?.x).toBeGreaterThan(smoothedEarly?.x ?? 0);
+    expect(smoothedLater?.x).toBeLessThanOrEqual(3);
+  });
 });
