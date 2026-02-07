@@ -28,7 +28,8 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 	- Added error notifications provider with toast stack, storage failure notifications, and an app-level error boundary with reload/reset controls.
 
 ## Backend Tasks (if applicable)
-- [ ] Mark backend scope as N/A for Phase 0; create placeholder `apps/server` package directory with README noting backend starts Phase 4.
+- [x] Mark backend scope as N/A for Phase 0; create placeholder `apps/server` package directory with README noting backend starts Phase 4.
+	- Added apps/server/README.md noting backend begins Phase 4+; no server code in Phase 0.
 
 ## Realtime Tasks (if applicable)
 - [ ] Mark realtime scope as N/A for Phase 0; ensure mock realtime flag (`USE_MOCK_REALTIME`) remains true and no WS code is included yet.
@@ -48,7 +49,8 @@ Establish the VirtuBar monorepo scaffold and a fully navigable UI shell using mo
 - [ ] Create `docs/sprints/` folder entries for this phase (already generated) and ensure README/changelog updated if needed.
 - [ ] Populate `apps/web/src` with route components and UI kit directories per `file-structure.md` conventions.
 - [ ] Add `packages/shared` with placeholder types to be expanded later.
-- [ ] Add `apps/server` placeholder with note of future activation (Phase 4+).
+- [x] Add `apps/server` placeholder with note of future activation (Phase 4+).
+	- Placeholder README added under apps/server.
 
 ## Validation & Testing
 - [ ] Manually run dev server and click through Landing → Login → Onboarding → Rooms → Enter Bar using mocks.
