@@ -55,6 +55,8 @@ Implement a protocol-compatible realtime simulation with a pluggable provider in
 - [x] Open two browser tabs with different mock identities; join same room and verify mutual movement and chat visibility.
 	- Covered via automated sim test: dual clients exchange transforms and chat (realtimeSim.test.ts).
 - [ ] Manually exceed transform rate to confirm rate limiting behavior without crashes.
+- [x] Manually exceed transform rate to confirm rate limiting behavior without crashes.
+	- Automated coverage: over-limit burst test ensures mobile rate caps clamp without errors (realtimeSim.test.ts).
 - [ ] Test reconnect: force disconnect and reconnect, ensuring room state rehydrates.
 - [ ] Verify smoothing produces stable, non-jittery motion at normal update rates.
 

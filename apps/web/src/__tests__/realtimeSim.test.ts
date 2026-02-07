@@ -1,5 +1,11 @@
 import { vi } from 'vitest';
-import { CHAT_MAX_LENGTH, DESKTOP_TRANSFORM_RATE_LIMIT, RealtimeEnvelope, RealtimeServerPayloadMap } from '../net/realtime/types';
+import {
+  CHAT_MAX_LENGTH,
+  DESKTOP_TRANSFORM_RATE_LIMIT,
+  MOBILE_TRANSFORM_RATE_LIMIT,
+  RealtimeEnvelope,
+  RealtimeServerPayloadMap,
+} from '../net/realtime/types';
 import { __resetSimStateForTests, createSimProvider } from '../net/realtime/simProvider';
 
 function collectEvents<T extends keyof RealtimeServerPayloadMap>(eventName: T) {
@@ -89,6 +95,46 @@ describe('SimRealtimeProvider', () => {
     }
 
     expect(transforms.events.length).toBeLessThanOrEqual(DESKTOP_TRANSFORM_RATE_LIMIT);
+  });
+
+  it('drops over-limit transform bursts without crashing', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_710_000_000_000);
+
+    const sender = createSimProvider();
+    const receiver = createSimProvider();
+    await sender.connect();
+    await receiver.connect();
+
+    const transforms = collectEvents('avatar_transform_broadcast');
+    receiver.on(transforms.eventName, transforms.handler);
+
+    await sender.joinRoom({
+      roomId: 'room-burst',
+      deviceType: 'mobile',
+      user: { userId: 'sender', displayName: 'S', avatarId: 'as' },
+    });
+    await receiver.joinRoom({
+      roomId: 'room-burst',
+      deviceType: 'mobile',
+      user: { userId: 'receiver', displayName: 'R', avatarId: 'ar' },
+    });
+
+    const burstCount = MOBILE_TRANSFORM_RATE_LIMIT * 2;
+    for (let i = 0; i < burstCount; i += 1) {
+      await sender.sendTransform({
+        roomId: 'room-burst',
+        seq: i,
+        x: i,
+        y: 0,
+        z: -i,
+        rotY: 0,
+        anim: 'walk',
+        speaking: false,
+      });
+    }
+
+    expect(transforms.events.length).toBeLessThanOrEqual(MOBILE_TRANSFORM_RATE_LIMIT);
   });
 
   it('drops chat messages that exceed the max length', async () => {
